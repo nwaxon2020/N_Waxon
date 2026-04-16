@@ -65,7 +65,7 @@ async function applyHomeConfig() {
         const contactIconsDiv = document.getElementById('socialIconsContact');
         const footerSocialDiv = document.getElementById('footerSocial');
         const emailP = document.getElementById('contactEmailDisplay');
-        
+
         let phone = config.contacts?.phone || '';
         const email = config.contacts?.email || '';
         const github = config.contacts?.github || '';
@@ -112,7 +112,7 @@ async function applyHomeConfig() {
                 const boilerplate = encodeURIComponent(`Hello ${adminName}, I'm interested in your services and would like to discuss a project with you.`);
                 whatsappBtn.style.display = 'flex';
                 whatsappBtn.onclick = () => window.open(`https://wa.me/${phone.replace('+', '')}?text=${boilerplate}`, '_blank');
-                
+
                 callBtn.style.display = 'flex';
                 callBtn.onclick = () => window.location.href = `tel:${phone}`;
             } else {
@@ -127,7 +127,7 @@ async function applyHomeConfig() {
         if (footerSocialDiv) {
             footerSocialDiv.innerHTML = '';
             const socials = config.socials || {};
-            
+
             const platforms = [
                 { id: 'twitter', icon: 'fab fa-twitter', base: 'https://twitter.com/' },
                 { id: 'instagram', icon: 'fab fa-instagram', base: 'https://instagram.com/' },
@@ -143,6 +143,23 @@ async function applyHomeConfig() {
             });
         }
     }
+
+    // Apply Quick Links across all .links-grid elements
+    const linkGrids = document.querySelectorAll('.links-grid');
+    if (linkGrids.length > 0) {
+        const qLinks = config.quickLinks || [];
+        if (qLinks.length > 0) {
+            linkGrids.forEach(grid => {
+                grid.innerHTML = '';
+                qLinks.forEach(link => {
+                    grid.innerHTML += `<a href="${link.url}" target="_blank" class="link-card">
+                        <i class="${link.icon || 'fas fa-link'}"></i>
+                        <span>${link.text || 'Link'}</span>
+                    </a>`;
+                });
+            });
+        }
+    }
 }
 
 async function loadSlider() {
@@ -150,13 +167,13 @@ async function loadSlider() {
     if (!slider) return;
 
     slider.innerHTML = 'Loading creations...';
-    
+
     // Fetch from Firestore
     let projects = await getDocs('projects');
-    
+
     // Filter for home page showcased projects
     projects = projects.filter(proj => proj.showOnHome === true);
-    
+
     // Fallback to demo data if no projects are highlighted
     if (projects.length === 0) {
         projects = demoProjects.map((p, i) => ({ ...p, name: p.title, media: [{ url: p.img, type: 'image' }] }));
@@ -181,7 +198,7 @@ async function loadSlider() {
             // The openOverlay in blog.js uses the 'blogMedia' global or whatever is passed
             // We'll update blog.js to be more flexible
             window._currentProjects = projects;
-            openOverlay(idx, projects); 
+            openOverlay(idx, projects);
         };
         slider.appendChild(card);
     });
@@ -202,7 +219,7 @@ function initMovingText() {
             el.innerText = texts[idx % texts.length];
             idx++;
         }
-    }, 2000);
+    }, 4000);
 }
 
 function initHomeButtons() {
@@ -230,8 +247,8 @@ function initHomeButtons() {
 
     if (emailBtn) {
         emailBtn.addEventListener('click', () => {
-             // email logic is handled in applyHomeConfig if data exists
-             // but we keep this as fallback if needed or if data doesn't load
+            // email logic is handled in applyHomeConfig if data exists
+            // but we keep this as fallback if needed or if data doesn't load
         });
     }
 }
@@ -254,4 +271,4 @@ function initViewMoreButton() {
         });
     }
 }
-
+

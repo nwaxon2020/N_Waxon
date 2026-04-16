@@ -213,6 +213,25 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1.5rem;
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.5rem;
+    align-content: start;
+}
+
+.admin-projects-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.admin-projects-grid::-webkit-scrollbar-track {
+    background: #161b22;
+    border-radius: 6px;
+}
+
+.admin-projects-grid::-webkit-scrollbar-thumb {
+    background: #7c3aed;
+    border-radius: 6px;
 }
 
 .admin-project-item {
@@ -408,9 +427,20 @@
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 @media (max-width: 768px) {
@@ -425,8 +455,8 @@
     .dynamic-item {
         flex-direction: column;
     }
-    
-    .dynamic-item > * {
+
+    .dynamic-item>* {
         width: 100% !important;
     }
 
@@ -450,7 +480,12 @@
         padding: 1.5rem;
         bottom: -200px;
     }
+
     .admin-floating-bar.active {
         bottom: 20px;
+    }
+
+    .admin-projects-grid {
+        max-height: 1200px;
     }
 }

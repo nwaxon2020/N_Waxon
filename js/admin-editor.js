@@ -174,20 +174,32 @@ function checkSectionDirty(sectionId) {
         }
 
         if (sectionId === 'project-settings') {
-            if (!currentEditingProjectId) return false;
-            const currentProj = {
-                name: document.getElementById('adminProjName')?.value || '',
-                link: document.getElementById('adminProjLink')?.value || '',
-                category: document.getElementById('adminProjCategory')?.value || '',
-                languages: document.getElementById('adminProjLanguages')?.value || '',
-                showHome: document.getElementById('adminProjShowHome')?.checked || false
-            };
-            
-            return currentProj.name !== (originalProjectData.name || '') ||
-                   currentProj.link !== (originalProjectData.link || '') ||
-                   currentProj.category !== (originalProjectData.category || '') ||
-                   currentProj.languages !== (originalProjectData.languages || '') ||
-                   currentProj.showHome !== (originalProjectData.showOnHome || false);
+            let isProjDirty = false;
+            if (currentEditingProjectId) {
+                const currentProj = {
+                    name: document.getElementById('adminProjName')?.value || '',
+                    link: document.getElementById('adminProjLink')?.value || '',
+                    category: document.getElementById('adminProjCategory')?.value || '',
+                    languages: document.getElementById('adminProjLanguages')?.value || '',
+                    showHome: document.getElementById('adminProjShowHome')?.checked || false
+                };
+                
+                isProjDirty = currentProj.name !== (originalProjectData.name || '') ||
+                       currentProj.link !== (originalProjectData.link || '') ||
+                       currentProj.category !== (originalProjectData.category || '') ||
+                       currentProj.languages !== (originalProjectData.languages || '') ||
+                       currentProj.showHome !== (originalProjectData.showOnHome || false);
+            }
+
+            const currentLinks = Array.from(document.querySelectorAll('.quick-link-item')).map(item => ({
+                icon: item.querySelector('.quick-link-icon').value,
+                text: item.querySelector('.quick-link-text').value,
+                url: item.querySelector('.quick-link-url').value
+            }));
+            const origLinks = originalHomeConfig.quickLinks || [];
+            const isLinksDirty = JSON.stringify(currentLinks) !== JSON.stringify(origLinks);
+
+            return isProjDirty || isLinksDirty;
         }
     } catch (e) {
         return true; 
@@ -260,6 +272,8 @@ async function loadHomeConfig() {
     if (!document.getElementById('adminGithub').value) document.getElementById('adminGithub').value = 'https://github.com/';
     if (!document.getElementById('adminLinkedin').value) document.getElementById('adminLinkedin').value = 'https://linkedin.com/in/';
     
+    renderQuickLinks(homeConfig.quickLinks || []);
+
     // Backup original values for dirty check comparison
     originalHomeConfig = JSON.parse(JSON.stringify(homeConfig));
     
@@ -274,7 +288,7 @@ function initHomeAdmin() {
     saveBtns.forEach(btn => {
         btn.onclick = async () => {
             const section = btn.getAttribute('data-section');
-            const tabId = section === 'hero' ? 'home-settings' : (section === 'about' || section === 'contacts' ? 'about-settings' : '');
+            const tabId = section === 'hero' ? 'home-settings' : (section === 'about' || section === 'contacts' || section === 'socials' ? 'about-settings' : (section === 'quickLinks' ? 'project-settings' : ''));
             
             btn.innerText = 'Saving...';
             btn.disabled = true;
@@ -328,6 +342,14 @@ function initHomeAdmin() {
                         twitter: document.getElementById('adminTwitter').value
                     };
                     await setDoc('config', 'home', { socials: socialsData });
+                } else if (section === 'quickLinks') {
+                    const linkElements = Array.from(document.querySelectorAll('.quick-link-item'));
+                    const linksData = linkElements.map(item => ({
+                        icon: item.querySelector('.quick-link-icon').value,
+                        text: item.querySelector('.quick-link-text').value,
+                        url: item.querySelector('.quick-link-url').value
+                    }));
+                    await setDoc('config', 'home', { quickLinks: linksData });
                 }
                 
                 if (tabId) setDirty(tabId, false);
@@ -388,10 +410,12 @@ function initAboutContactAdmin() {
     const paraBtn = document.getElementById('addAboutParaBtn');
     const bulletBtn = document.getElementById('addAboutBulletBtn');
     const contactBtn = document.getElementById('addContactBtn');
+    const quickLinkBtn = document.getElementById('addQuickLinkBtn');
     
     if (paraBtn) paraBtn.onclick = () => addAboutParaRow();
     if (bulletBtn) bulletBtn.onclick = () => addAboutBulletRow();
     if (contactBtn) contactBtn.onclick = () => addContactRow();
+    if (quickLinkBtn) quickLinkBtn.onclick = () => addQuickLinkRow();
     
     console.log('[Admin] About/Contact admin initialized');
 }
@@ -416,6 +440,41 @@ function addAboutBulletRow(data = { icon: 'fas fa-star', text: '' }) {
             <option value="fas fa-globe" ${data.icon === 'fas fa-globe' ? 'selected' : ''}>🌐 Globe</option>
         </select>
         <input type="text" class="about-bullet-text" placeholder="Bullet text" value="${data.text}">
+        <button class="remove-btn" onclick="this.parentElement.remove(); window.dispatchEvent(new Event('input', {bubbles:true}))"><i class="fas fa-trash"></i></button>
+    `;
+    container.appendChild(div);
+}
+
+// --- QUICK LINKS ---
+function renderQuickLinks(links) {
+    const container = document.getElementById('adminQuickLinksContainer');
+    if (container) {
+        container.innerHTML = '';
+        links.forEach(l => addQuickLinkRow(l));
+    }
+}
+
+function addQuickLinkRow(data = { text: '', url: '', icon: 'fas fa-link' }) {
+    const container = document.getElementById('adminQuickLinksContainer');
+    if (!container) return;
+    const div = document.createElement('div');
+    div.className = 'dynamic-item quick-link-item';
+    div.innerHTML = `
+        <select class="quick-link-icon" style="width: auto;">
+            <option value="fas fa-link" ${data.icon === 'fas fa-link' ? 'selected' : ''}>🔗 Link</option>
+            <option value="fab fa-github" ${data.icon === 'fab fa-github' ? 'selected' : ''}>🐱 GitHub</option>
+            <option value="fas fa-globe" ${data.icon === 'fas fa-globe' ? 'selected' : ''}>🌐 Globe</option>
+            <option value="fas fa-code" ${data.icon === 'fas fa-code' ? 'selected' : ''}>💻 Code</option>
+            <option value="fas fa-play" ${data.icon === 'fas fa-play' ? 'selected' : ''}>▶️ Play</option>
+            <option value="fab fa-youtube" ${data.icon === 'fab fa-youtube' ? 'selected' : ''}>▶️ YouTube</option>
+            <option value="fab fa-twitter" ${data.icon === 'fab fa-twitter' ? 'selected' : ''}>🐦 Twitter</option>
+            <option value="fab fa-linkedin" ${data.icon === 'fab fa-linkedin' ? 'selected' : ''}>💼 LinkedIn</option>
+            <option value="fab fa-medium" ${data.icon === 'fab fa-medium' ? 'selected' : ''}>📝 Medium</option>
+            <option value="fab fa-dribbble" ${data.icon === 'fab fa-dribbble' ? 'selected' : ''}>🏀 Dribbble</option>
+            <option value="fab fa-behance" ${data.icon === 'fab fa-behance' ? 'selected' : ''}>🎨 Behance</option>
+        </select>
+        <input type="text" class="quick-link-text" placeholder="Title (e.g., Portfolio)" value="${data.text}">
+        <input type="text" class="quick-link-url" placeholder="URL (https://...)" value="${data.url}">
         <button class="remove-btn" onclick="this.parentElement.remove(); window.dispatchEvent(new Event('input', {bubbles:true}))"><i class="fas fa-trash"></i></button>
     `;
     container.appendChild(div);
