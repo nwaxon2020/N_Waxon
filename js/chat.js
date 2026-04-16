@@ -108,15 +108,41 @@ export async function loadUsersList() {
 /**
  * Delete user name (for regular users). Clears localStorage and re-prompts.
  */
-export function deleteUserName() {
+export async function deleteUserName() {
     if (confirm("Delete your name? You'll need to enter a new one to continue chatting.")) {
+        const oldUserId = currentUserId;
+
+        if (firestoreAvailable && db && oldUserId) {
+            try {
+                // Delete user profile
+                await db.collection(USERS_COLLECTION).doc(oldUserId).delete();
+                
+                // Delete messages globally
+                const snapshot = await db.collection(CHAT_COLLECTION).where('userId', '==', oldUserId).get();
+                if (!snapshot.empty) {
+                    const docs = snapshot.docs;
+                    for (let i = 0; i < docs.length; i += 500) {
+                        const batch = db.batch();
+                        docs.slice(i, i + 500).forEach(doc => batch.delete(doc.ref));
+                        await batch.commit();
+                    }
+                }
+            } catch (err) {
+                console.error("Error deleting user data: ", err);
+            }
+        }
+
         localStorage.removeItem('userDisplayName');
         localStorage.removeItem('chatUserId');
         currentUserId = 'user_' + Math.random().toString(36).substr(2, 6);
         currentUserName = '';
         localStorage.setItem('chatUserId', currentUserId);
         setCurrentUser('');
-        updateSidebarContent();
+        
+        const msgsDiv = document.getElementById('chatMessages');
+        if (msgsDiv) msgsDiv.innerHTML = '';
+        
+        await updateSidebarContent();
 
         setTimeout(() => {
             const modal = document.getElementById('namePromptModal');
@@ -172,12 +198,62 @@ async function updateSidebarContent() {
 
     if (isAdmin) {
         // ---- ADMIN SIDEBAR ----
-        let usersHTML = '';
+        
+        let usersHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; padding: 2rem; color: #3b82f6;">
+                <i class="fas fa-circle-notch fa-spin fa-lg"></i>
+            </div>
+        `;
+        
+        // Temporarily render sidebar with loading state
+        sidebar.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0;">
+                <img src="${adminImg}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                <div>
+                    <strong>${adminName}</strong><br>
+                    <small style="color: #a78bfa;">System Administrator</small>
+                </div>
+            </div>
+            <hr style="margin: 1rem 0; border-color: #2d3345;">
+            <div style="background: rgba(167,139,250,0.1); padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(167,139,250,0.2);">
+                <p style="margin: 0 0 0.5rem; font-size: 0.85rem; color: #a78bfa;">
+                    <i class="fas fa-crown"></i> <strong>You are the Admin</strong>
+                </p>
+                <button id="globalSidebarDeleteBtn"
+                    style="width: 100%; background: linear-gradient(135deg, #ef4444, #991b1b); padding: 0.5rem; font-size: 0.8rem; border-radius: 8px; color: white; border: none; cursor: pointer; margin-top: 0.3rem;"
+                    title="Delete ALL chat messages globally">
+                    <i class="fas fa-radiation"></i> Wipe All Chats
+                </button>
+            </div>
+            <div id="adminContactsArea">
+                ${usersHTML}
+            </div>
+        `;
 
         if (firestoreAvailable && db) {
             try {
                 const snapshot = await db.collection(USERS_COLLECTION).orderBy('timestamp', 'desc').get();
-                const users = snapshot.docs.map(doc => doc.data());
+                let usersMap = new Map();
+                
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.userId) usersMap.set(data.userId, data);
+                });
+
+                // Reconstruct missing contacts from chat history
+                const chatSnapshot = await db.collection(CHAT_COLLECTION).orderBy('timestamp', 'asc').get();
+                chatSnapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.userId && !data.isAdmin && !usersMap.has(data.userId)) {
+                        usersMap.set(data.userId, {
+                            userId: data.userId,
+                            displayName: data.userName || data.name || 'Unknown',
+                            timestamp: data.timestamp
+                        });
+                    }
+                });
+
+                const users = Array.from(usersMap.values()).sort((a, b) => b.timestamp - a.timestamp);
 
                 if (users.length > 0) {
                     usersHTML = `
@@ -209,28 +285,9 @@ async function updateSidebarContent() {
                 usersHTML = '<p style="color: #ef4444; font-size: 0.8rem; margin-top: 0.5rem;">Error loading contacts.</p>';
             }
         }
-
-        sidebar.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0;">
-                <img src="${adminImg}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
-                <div>
-                    <strong>${adminName}</strong><br>
-                    <small style="color: #a78bfa;">System Administrator</small>
-                </div>
-            </div>
-            <hr style="margin: 1rem 0; border-color: #2d3345;">
-            <div style="background: rgba(167,139,250,0.1); padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(167,139,250,0.2);">
-                <p style="margin: 0 0 0.5rem; font-size: 0.85rem; color: #a78bfa;">
-                    <i class="fas fa-crown"></i> <strong>You are the Admin</strong>
-                </p>
-                <button id="globalSidebarDeleteBtn"
-                    style="width: 100%; background: linear-gradient(135deg, #ef4444, #991b1b); padding: 0.5rem; font-size: 0.8rem; border-radius: 8px; color: white; border: none; cursor: pointer; margin-top: 0.3rem;"
-                    title="Delete ALL chat messages globally">
-                    <i class="fas fa-radiation"></i> Wipe All Chats
-                </button>
-            </div>
-            ${usersHTML}
-        `;
+        
+        const contactsArea = document.getElementById('adminContactsArea');
+        if (contactsArea) contactsArea.innerHTML = usersHTML;
 
         // Bind global delete
         const globalDelBtn = document.getElementById('globalSidebarDeleteBtn');
@@ -290,34 +347,51 @@ async function globalDeleteAllChats() {
     }
 
     try {
-        const snapshot = await db.collection(CHAT_COLLECTION).get();
+        if (!confirm(`Delete ALL messages AND contacts globally? This cannot be undone.`)) return;
 
-        if (snapshot.empty) {
-            alert("No messages to delete.");
-            return;
+        let messagesDeleted = 0;
+        const msgSnapshot = await db.collection(CHAT_COLLECTION).get();
+        
+        if (!msgSnapshot.empty) {
+            const docs = msgSnapshot.docs;
+            for (let i = 0; i < docs.length; i += 500) {
+                const batch = db.batch();
+                docs.slice(i, i + 500).forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+            }
+            messagesDeleted = docs.length;
         }
 
-        if (!confirm(`Delete ALL ${snapshot.size} messages globally? This cannot be undone.`)) return;
+        let usersDeleted = 0;
+        const userSnapshot = await db.collection(USERS_COLLECTION).get();
 
-        // Firestore batches handle max 500 ops
-        const docs = snapshot.docs;
-        for (let i = 0; i < docs.length; i += 500) {
-            const batch = db.batch();
-            docs.slice(i, i + 500).forEach(doc => batch.delete(doc.ref));
-            await batch.commit();
+        if (!userSnapshot.empty) {
+            const docs = userSnapshot.docs;
+            for (let i = 0; i < docs.length; i += 500) {
+                const batch = db.batch();
+                docs.slice(i, i + 500).forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+            }
+            usersDeleted = docs.length;
+        }
+
+        if (messagesDeleted === 0 && usersDeleted === 0) {
+            alert("No messages or contacts to delete.");
+            return;
         }
 
         // Clear UI
         const msgsArea = document.getElementById('chatMessages');
         if (msgsArea) {
-            msgsArea.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 2rem;"><i class="fas fa-check-circle" style="color: #22c55e;"></i> Chat cleared globally.</div>';
+            msgsArea.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 2rem;"><i class="fas fa-check-circle" style="color: #22c55e;"></i> Chat and contacts cleared globally.</div>';
         }
 
-        alert(`Deleted ${docs.length} messages globally.`);
+        alert(`Deleted ${messagesDeleted} messages and ${usersDeleted} contacts globally.`);
+        await updateSidebarContent();
     } catch (err) {
         console.error("[Chat] Global delete error:", err);
         if (err.code === 'permission-denied') {
-            alert("Permission denied. Your Firestore rules may not allow deleting from 'globalChat'. Check your Firebase console → Firestore → Rules.");
+            alert("Permission denied. Your Firestore rules may not allow deleting from 'globalChat' or 'users'. Check your Firebase console → Firestore → Rules.");
         } else {
             alert("Delete failed: " + err.message);
         }
@@ -408,7 +482,6 @@ function initChatListeners() {
     }
 }
 
-// ========== MESSAGING ==========
 async function sendMessage(text) {
     if (!firestoreAvailable || !db) {
         alert("Firebase not configured. Please add your Firebase config.");
@@ -424,18 +497,40 @@ async function sendMessage(text) {
     const config = await fetchHomeConfig();
     const adminName = config?.hero?.name || 'Prince O.N';
 
+    const timestamp = Date.now();
+
+    // 1. Send the message
     db.collection(CHAT_COLLECTION).add({
         userId: currentUserId,
         userName: currentUserName,
         name: isAdmin ? `${adminName} (Admin)` : currentUserName,
         text: text,
-        timestamp: Date.now(),
+        timestamp: timestamp,
         isAdmin: isAdmin
     });
+
+    // 2. Re-register the user in contacts so they reappear if they were deleted
+    if (!isAdmin) {
+        db.collection(USERS_COLLECTION).doc(currentUserId).set({
+            displayName: currentUserName,
+            userId: currentUserId,
+            timestamp: timestamp
+        }, { merge: true });
+    }
 }
 
 function loadMessagesRealtime() {
     if (!firestoreAvailable || !db) return;
+
+    const msgsDiv = document.getElementById('chatMessages');
+    if (msgsDiv) {
+        msgsDiv.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; gap: 0.8rem; color: #3b82f6;">
+                <i class="fas fa-spinner fa-pulse fa-2x"></i>
+                <span style="font-size: 0.85rem; color: #94a3b8;">Loading chat...</span>
+            </div>
+        `;
+    }
 
     db.collection(CHAT_COLLECTION)
         .orderBy('timestamp', 'asc')
