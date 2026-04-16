@@ -566,6 +566,7 @@
     .admin-login-btn {
         margin-bottom: 2rem;
     }
+
 }
 
 /* Interactivity & Prominence */
@@ -656,4 +657,29 @@
 #contactProposalBtn:hover {
     background: #1e40af !important;
     transform: scale(1.05);
+}
+
+#buyCoffeeBtn {
+    background: transparent;
+    border: none;
+    color: #8f9bb3;
+    cursor: pointer;
+    font-size: 0.75rem;
+    /* very small text */
+    margin-top: 0.2rem;
+    /* very close to the proposal btn */
+    transition: all 0.2s;
+    display: inline-block;
+    text-decoration: underline;
+}
+
+#buyCoffeeBtn i {
+    color: #a78bfa;
+    margin-right: 0.3rem;
+}
+
+#buyCoffeeBtn:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 8px #a78bfa;
+    transform: translateY(-2px);
 }

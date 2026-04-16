@@ -95,6 +95,22 @@ async function applyHomeConfig() {
 
         // Apply to Hero Buttons
         const heroButtons = document.getElementById('heroButtons');
+        const buyCoffeeBtn = document.getElementById('buyCoffeeBtn');
+
+        if (config.coffee && config.coffee.account) {
+            document.getElementById('coffeeFullName').innerText = config.coffee.fullName || '';
+            document.getElementById('coffeeAccount').innerText = config.coffee.account || '';
+            document.getElementById('coffeeBankName').innerText = config.coffee.bankName || '';
+            
+            const logoEl = document.getElementById('coffeeBankLogo');
+            if (config.coffee.logoUrl) {
+                logoEl.src = config.coffee.logoUrl;
+                logoEl.style.display = 'block';
+            } else {
+                logoEl.style.display = 'none';
+            }
+        }
+
         if (heroButtons) {
             const emailBtn = document.getElementById('emailMeBtnHome');
             const whatsappBtn = document.getElementById('whatsappBtnHome');
@@ -148,17 +164,15 @@ async function applyHomeConfig() {
     const linkGrids = document.querySelectorAll('.links-grid');
     if (linkGrids.length > 0) {
         const qLinks = config.quickLinks || [];
-        if (qLinks.length > 0) {
-            linkGrids.forEach(grid => {
-                grid.innerHTML = '';
-                qLinks.forEach(link => {
-                    grid.innerHTML += `<a href="${link.url}" target="_blank" class="link-card">
-                        <i class="${link.icon || 'fas fa-link'}"></i>
-                        <span>${link.text || 'Link'}</span>
-                    </a>`;
-                });
+        linkGrids.forEach(grid => {
+            grid.innerHTML = ''; // Always match the database 1:1, clear placeholders
+            qLinks.forEach(link => {
+                grid.innerHTML += `<a href="${link.url}" target="_blank" class="link-card">
+                    <i class="${link.icon || 'fas fa-link'}"></i>
+                    <span>${link.text || 'Link'}</span>
+                </a>`;
             });
-        }
+        });
     }
 }
 
@@ -226,6 +240,22 @@ function initHomeButtons() {
     const jobProposalBtn = document.getElementById('jobProposalBtnHome');
     const contactProposalBtn = document.getElementById('contactProposalBtn');
     const emailBtn = document.getElementById('emailMeBtnHome');
+    const buyCoffeeBtn = document.getElementById('buyCoffeeBtn');
+    const closeCoffeeBtn = document.getElementById('closeCoffeeBtn');
+
+    if (buyCoffeeBtn) {
+        buyCoffeeBtn.addEventListener('click', () => {
+            const modal = document.getElementById('coffeeModal');
+            if (modal) modal.classList.add('active');
+        });
+    }
+
+    if (closeCoffeeBtn) {
+        closeCoffeeBtn.addEventListener('click', () => {
+            const modal = document.getElementById('coffeeModal');
+            if (modal) modal.classList.remove('active');
+        });
+    }
 
     if (jobProposalBtn) {
         jobProposalBtn.addEventListener('click', () => {

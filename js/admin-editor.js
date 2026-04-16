@@ -141,7 +141,19 @@ function checkSectionDirty(sectionId) {
             const isMetaDirty = currentMeta.logoText !== (originalHomeConfig.logoText || '') ||
                    currentMeta.siteTitle !== (originalHomeConfig.siteTitle || '');
 
-            return isHeroDirty || isMetaDirty;
+            const currentCoffee = {
+                fullName: document.getElementById('adminBankFullName')?.value || '',
+                account: document.getElementById('adminBankAccount')?.value || '',
+                bankName: document.getElementById('adminBankName')?.value || '',
+                logoUrl: document.getElementById('adminBankLogo')?.value || ''
+            };
+            const origCoffee = originalHomeConfig.coffee || {};
+            const isCoffeeDirty = currentCoffee.fullName !== (origCoffee.fullName || '') ||
+                   currentCoffee.account !== (origCoffee.account || '') ||
+                   currentCoffee.bankName !== (origCoffee.bankName || '') ||
+                   currentCoffee.logoUrl !== (origCoffee.logoUrl || '');
+
+            return isHeroDirty || isMetaDirty || isCoffeeDirty;
         }
 
         if (sectionId === 'about-settings') {
@@ -190,16 +202,17 @@ function checkSectionDirty(sectionId) {
                        currentProj.languages !== (originalProjectData.languages || '') ||
                        currentProj.showHome !== (originalProjectData.showOnHome || false);
             }
+            return isProjDirty;
+        }
 
+        if (sectionId === 'quick-link-settings') {
             const currentLinks = Array.from(document.querySelectorAll('.quick-link-item')).map(item => ({
                 icon: item.querySelector('.quick-link-icon').value,
                 text: item.querySelector('.quick-link-text').value,
                 url: item.querySelector('.quick-link-url').value
             }));
             const origLinks = originalHomeConfig.quickLinks || [];
-            const isLinksDirty = JSON.stringify(currentLinks) !== JSON.stringify(origLinks);
-
-            return isProjDirty || isLinksDirty;
+            return JSON.stringify(currentLinks) !== JSON.stringify(origLinks);
         }
     } catch (e) {
         return true; 
@@ -250,6 +263,12 @@ async function loadHomeConfig() {
     document.getElementById('adminHeroSubtext').value = homeConfig.hero?.subtext || '';
     document.getElementById('adminMovingWords').value = homeConfig.hero?.movingWords?.join(', ') || '';
     document.getElementById('adminHeroImgUrl').value = homeConfig.hero?.imgUrl || '';
+    
+    document.getElementById('adminBankFullName').value = homeConfig.coffee?.fullName || '';
+    document.getElementById('adminBankAccount').value = homeConfig.coffee?.account || '';
+    document.getElementById('adminBankName').value = homeConfig.coffee?.bankName || '';
+    document.getElementById('adminBankLogo').value = homeConfig.coffee?.logoUrl || '';
+
     document.getElementById('adminAboutTitle').value = homeConfig.about?.title || '';
 
     // Render About Paragraphs
@@ -288,7 +307,7 @@ function initHomeAdmin() {
     saveBtns.forEach(btn => {
         btn.onclick = async () => {
             const section = btn.getAttribute('data-section');
-            const tabId = section === 'hero' ? 'home-settings' : (section === 'about' || section === 'contacts' || section === 'socials' ? 'about-settings' : (section === 'quickLinks' ? 'project-settings' : ''));
+            const tabId = (section === 'hero' || section === 'coffee') ? 'home-settings' : (section === 'about' || section === 'contacts' || section === 'socials' ? 'about-settings' : (section === 'quickLinks' ? 'quick-link-settings' : ''));
             
             btn.innerText = 'Saving...';
             btn.disabled = true;
@@ -313,6 +332,14 @@ function initHomeAdmin() {
                         logoText: document.getElementById('adminNavLogo').value,
                         siteTitle: document.getElementById('adminSiteTitle').value
                     });
+                } else if (section === 'coffee') {
+                    const coffeeData = {
+                        fullName: document.getElementById('adminBankFullName').value,
+                        account: document.getElementById('adminBankAccount').value,
+                        bankName: document.getElementById('adminBankName').value,
+                        logoUrl: document.getElementById('adminBankLogo').value
+                    };
+                    await setDoc('config', 'home', { coffee: coffeeData });
                 } else if (section === 'about') {
                     const paras = Array.from(document.querySelectorAll('.about-para-input')).map(i => i.value);
                     const bullets = Array.from(document.querySelectorAll('.about-bullet-item')).map(item => ({

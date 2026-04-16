@@ -39,12 +39,19 @@
                 </div>
                 <div class="hero-text">
                     <h1>Prince O.N</h1>
-                    <div class="moving-text" id="movingText"><span class="skeleton skeleton-text medium" style="height:22px;display:inline-block;"></span></div>
-                    <p id="heroSubtext"><span class="skeleton skeleton-text long" style="height:13px;display:inline-block;"></span><br><span class="skeleton skeleton-text medium" style="height:13px;display:inline-block;margin-top:6px;"></span></p>
+                    <div class="moving-text" id="movingText"><span class="skeleton skeleton-text medium"
+                            style="height:22px;display:inline-block;"></span></div>
+                    <p id="heroSubtext"><span class="skeleton skeleton-text long"
+                            style="height:13px;display:inline-block;"></span><br><span
+                            class="skeleton skeleton-text medium"
+                            style="height:13px;display:inline-block;margin-top:6px;"></span></p>
                     <div class="hero-buttons" id="heroButtons" style="display:none;">
-                        <button id="emailMeBtnHome"><i class="fas fa-envelope"></i> <span class="btn-label">Email Me</span></button>
-                        <button id="whatsappBtnHome"><i class="fab fa-whatsapp"></i> <span class="btn-label">WhatsApp</span></button>
-                        <button id="callBtnHome"><i class="fas fa-phone-alt"></i> <span class="btn-label">Call Now</span></button>
+                        <button id="emailMeBtnHome"><i class="fas fa-envelope"></i> <span class="btn-label">Email
+                                Me</span></button>
+                        <button id="whatsappBtnHome"><i class="fab fa-whatsapp"></i> <span
+                                class="btn-label">WhatsApp</span></button>
+                        <button id="callBtnHome"><i class="fas fa-phone-alt"></i> <span class="btn-label">Call
+                                Now</span></button>
                         <button id="jobProposalBtnHome">📋 Send Job Proposal</button>
                     </div>
                 </div>
@@ -80,12 +87,16 @@
                 <div class="info-card contact-card" id="contactCard">
                     <h3><i class="fas fa-paper-plane"></i> Contact & Social</h3>
                     <div class="social-icons" id="socialIconsContact">
-                        <span class="skeleton-circle" style="width:30px;height:30px;display:inline-block;margin-right:0.5rem;"></span>
-                        <span class="skeleton-circle" style="width:30px;height:30px;display:inline-block;margin-right:0.5rem;"></span>
+                        <span class="skeleton-circle"
+                            style="width:30px;height:30px;display:inline-block;margin-right:0.5rem;"></span>
+                        <span class="skeleton-circle"
+                            style="width:30px;height:30px;display:inline-block;margin-right:0.5rem;"></span>
                         <span class="skeleton-circle" style="width:30px;height:30px;display:inline-block;"></span>
                     </div>
-                    <a href="#" id="contactEmailDisplay"><span class="skeleton skeleton-text medium" style="height:18px;display:inline-block;"></span></a>
+                    <a href="#" id="contactEmailDisplay"><span class="skeleton skeleton-text medium"
+                            style="height:18px;display:inline-block;"></span></a>
                     <button id="contactProposalBtn">💼 Propose a Project</button>
+                    <button id="buyCoffeeBtn"><i class="fas fa-mug-hot"></i> Buy Me Coffee</button>
                 </div>
             </div>
 
@@ -280,11 +291,13 @@
             <h3><i class="fas fa-lock"></i> Admin Access</h3>
             <p>Authorized access only. Sign in with your registered admin account.</p>
             <div class="admin-login-buttons" style="flex-direction: column; gap: 1rem;">
-                <button id="googleLoginBtn" class="btn-primary" style="background: white; color: #444; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.8rem;">
+                <button id="googleLoginBtn" class="btn-primary"
+                    style="background: white; color: #444; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.8rem;">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
                     Sign in with Google
                 </button>
-                <button id="cancelAdminBtn" style="background: transparent; border: 1px solid #30363d; color: #8b949e; width: 100%;">Cancel</button>
+                <button id="cancelAdminBtn"
+                    style="background: transparent; border: 1px solid #30363d; color: #8b949e; width: 100%;">Cancel</button>
             </div>
         </div>
     </div>
@@ -302,6 +315,7 @@
                 <button class="admin-tab active" data-tab="home-settings">Home Settings</button>
                 <button class="admin-tab" data-tab="about-settings">About & Contacts</button>
                 <button class="admin-tab" data-tab="project-settings">Projects (Blog)</button>
+                <button class="admin-tab" data-tab="quick-link-settings">Quick Links</button>
                 <button class="admin-tab" data-tab="chat-settings">Chat Admin</button>
             </div>
 
@@ -344,6 +358,29 @@
                     </div>
                     <button class="save-config-btn" data-section="hero">Save Hero Settings</button>
                 </div>
+
+                <div class="admin-form-card">
+                    <h3><i class="fas fa-coffee"></i> Donation / Support</h3>
+                    <div class="form-group">
+                        <label>Account Full Name</label>
+                        <input type="text" id="adminBankFullName" placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input type="text" id="adminBankAccount" placeholder="0000000000">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Bank Name</label>
+                            <input type="text" id="adminBankName" placeholder="Bank of America">
+                        </div>
+                        <div class="form-group">
+                            <label>Bank Logo URL</label>
+                            <input type="text" id="adminBankLogo" placeholder="https://...">
+                        </div>
+                    </div>
+                    <button class="save-config-btn" data-section="coffee">Save Support Details</button>
+                </div>
             </div>
 
             <!-- About & Contacts Tab -->
@@ -357,13 +394,15 @@
                     <div id="aboutParagraphsContainer">
                         <!-- Dynamic paragraphs -->
                     </div>
-                    <button id="addAboutParaBtn" class="btn-secondary"><i class="fas fa-plus"></i> Add Paragraph</button>
+                    <button id="addAboutParaBtn" class="btn-secondary"><i class="fas fa-plus"></i> Add
+                        Paragraph</button>
 
                     <h4 style="margin: 1.5rem 0 1rem; color: #8b949e; font-size: 0.9rem;">Bullet Points Highlights</h4>
                     <div id="aboutBulletsContainer">
                         <!-- Dynamic bullets with icon selector -->
                     </div>
-                    <button id="addAboutBulletBtn" class="btn-secondary" style="margin-bottom: 2rem;"><i class="fas fa-plus"></i> Add Bullet Point</button>
+                    <button id="addAboutBulletBtn" class="btn-secondary" style="margin-bottom: 2rem;"><i
+                            class="fas fa-plus"></i> Add Bullet Point</button>
 
                     <button class="save-config-btn" data-section="about">Save About Settings</button>
                 </div>
@@ -447,14 +486,16 @@
 
                     <div class="form-group" style="display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0;">
                         <input type="checkbox" id="adminProjShowHome" style="width: auto; cursor: pointer;">
-                        <label for="adminProjShowHome" style="margin: 0; cursor: pointer; color: #e6edf3;">✨ Show in Home Page Slider</label>
+                        <label for="adminProjShowHome" style="margin: 0; cursor: pointer; color: #e6edf3;">✨ Show in
+                            Home Page Slider</label>
                     </div>
 
                     <h4>Media Items</h4>
                     <div id="adminMediaItemsContainer">
                         <!-- Dynamic media entries -->
                     </div>
-                    <button id="addMediaBtn" class="btn-secondary"><i class="fas fa-plus"></i> Add Media (Image/Video)</button>
+                    <button id="addMediaBtn" class="btn-secondary"><i class="fas fa-plus"></i> Add Media
+                        (Image/Video)</button>
                     <hr style="margin: 1.5rem 0; border: 0.5px solid #2d3345;">
                     <button id="saveProjectBtn" class="btn-primary">Save Project</button>
                 </div>
@@ -465,14 +506,19 @@
                         <!-- Dynamic project list -->
                     </div>
                 </div>
+            </div>
 
+            <!-- Quick Links Tab -->
+            <div id="quick-link-settings" class="tab-content">
                 <div class="admin-form-card">
                     <h3><i class="fas fa-link"></i> Quick Links</h3>
-                    <p style="color: #8b949e; margin-bottom: 1rem; font-size: 0.85rem;">Manage the Quick Links that appear across all pages.</p>
+                    <p style="color: #8b949e; margin-bottom: 1rem; font-size: 0.85rem;">Manage the Quick Links that
+                        appear across all pages.</p>
                     <div id="adminQuickLinksContainer">
                         <!-- Dynamic Quick Links -->
                     </div>
-                    <button id="addQuickLinkBtn" class="btn-secondary"><i class="fas fa-plus"></i> Add Quick Link</button>
+                    <button id="addQuickLinkBtn" class="btn-secondary"><i class="fas fa-plus"></i> Add Quick
+                        Link</button>
                     <button class="save-config-btn" data-section="quickLinks">Save Quick Links</button>
                 </div>
             </div>
@@ -513,6 +559,26 @@
                 <button id="confirmYesBtn" class="delete-btn">Yes, Delete</button>
                 <button id="confirmNoBtn">Cancel</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Coffee Modal -->
+    <div id="coffeeModal" class="confirm-modal">
+        <div class="confirm-modal-content" style="text-align: center; padding: 2.5rem 1.5rem; margin: 0 1rem;">
+            <div id="coffeeDetailsContainer"
+                style="margin-bottom: 1.8rem; display: flex; flex-direction: column; align-items: center;">
+                <img id="coffeeBankLogo" src="" alt="Bank Logo"
+                    style="width: 90px; height: 90px; object-fit: contain; border-radius: 1rem; margin-bottom: 1rem; display: none; background: white; padding: 6px;">
+                <h3 style="color: #e6edf3; font-size: 1.3rem; margin: 0;" id="coffeeFullName"></h3>
+                <p style="font-size: 2.2rem; color: #a78bfa; font-weight: 800; margin: 0.4rem 0; letter-spacing: 2px;"
+                    id="coffeeAccount"></p>
+                <p style="font-size: 1rem; color: #8b949e; margin: 0;" id="coffeeBankName"></p>
+            </div>
+
+            <p style="color: #6e7681; margin-bottom: 1.5rem; font-size: 0.85rem;"><i class="fas fa-mug-hot"></i> Support
+                the Creator. Thank you so much!</p>
+
+            <button id="closeCoffeeBtn" class="btn-secondary" style="width: 100%; margin: 0;">Close</button>
         </div>
     </div>
 
