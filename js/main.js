@@ -69,34 +69,47 @@ function initAdminLogin() {
 function initRouting() {
     const pages = ['home', 'blog', 'chat', 'admin'];
 
+    const navigateTo = (pageId) => {
+        pages.forEach(p => {
+            const pg = document.getElementById(`${p}-page`);
+            if (pg) pg.classList.remove('active-page');
+        });
+        
+        const targetPage = document.getElementById(`${pageId}-page`);
+        if (targetPage) targetPage.classList.add('active-page');
+        
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll(`.nav-link[data-page="${pageId}"]`).forEach(l => l.classList.add('active'));
+
+        if (pageId === 'blog') initBlogPage();
+        if (pageId === 'chat') {
+            initChatPage();
+            checkAndPromptUserName();
+        }
+        if (pageId === 'admin') {
+            if (localStorage.getItem('isAdmin') !== 'true') {
+                alert("Unauthorized access. Please login with your admin account.");
+                navigateTo('home');
+                return;
+            }
+            initAdminEditor();
+        }
+    };
+
     document.querySelectorAll('.nav-link, .footer-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const pageId = link.getAttribute('data-page');
-            pages.forEach(p => {
-                const pg = document.getElementById(`${p}-page`);
-                if (pg) pg.classList.remove('active-page');
-            });
-            document.getElementById(`${pageId}-page`).classList.add('active-page');
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            if (link.classList.contains('nav-link')) link.classList.add('active');
-
-            if (pageId === 'blog') initBlogPage();
-            if (pageId === 'chat') {
-                initChatPage();
-                // Name prompt ONLY fires here — when user actually clicks Chat
-                checkAndPromptUserName();
-            }
-            if (pageId === 'admin') {
-                if (localStorage.getItem('isAdmin') !== 'true') {
-                    alert("Unauthorized access. Please login with your admin account.");
-                    document.querySelector('[data-page="home"]').click();
-                    return;
-                }
-                initAdminEditor();
-            }
+            localStorage.setItem('lastActivePage', pageId);
+            navigateTo(pageId);
         });
     });
+
+    // Restore the last active page on load
+    const savedPage = localStorage.getItem('lastActivePage') || 'home';
+    setTimeout(() => {
+        navigateTo(savedPage);
+    }, 50);
 }
 
 

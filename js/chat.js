@@ -8,6 +8,7 @@ let currentUserName = localStorage.getItem('userDisplayName') || '';
 let isAdmin = false;
 let adminSelectedUserId = null;
 let chatInitialized = false;
+let knownContactIds = new Set();
 const CHAT_COLLECTION = 'globalChat';
 const USERS_COLLECTION = 'users';
 
@@ -255,6 +256,9 @@ async function updateSidebarContent() {
                 });
 
                 const users = Array.from(usersMap.values()).sort((a, b) => b.timestamp - a.timestamp);
+                
+                // Track known contacts to detect new ones in realtime
+                knownContactIds = new Set(users.map(u => u.userId));
 
                 if (users.length > 0) {
                     usersHTML = `
@@ -593,6 +597,12 @@ function loadMessagesRealtime() {
                 const threadId = data.threadId || (data.isAdmin ? null : data.userId);
                 
                 if (isAdmin) {
+                    if (threadId && !knownContactIds.has(threadId)) {
+                        // We found a new chatter that isn't in the sidebar yet!
+                        // Fetch the UI update asynchronously
+                        setTimeout(updateSidebarContent, 100);
+                        knownContactIds.add(threadId); // Add it to prevent loops
+                    }
                     if (threadId !== adminSelectedUserId) return;
                 } else {
                     if (threadId !== currentUserId) return;

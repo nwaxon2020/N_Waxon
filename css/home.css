@@ -531,6 +531,14 @@
     .links-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
+
+    .info-card {
+        padding: 1.25rem 0.75rem;
+    }
+
+    .admin-login-btn {
+        margin-bottom: 2rem;
+    }
 }
 
 /* Interactivity & Prominence */
