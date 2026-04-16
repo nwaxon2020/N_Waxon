@@ -6,6 +6,7 @@ let homeConfig = null;
 let currentUserId = localStorage.getItem('chatUserId') || 'user_' + Math.random().toString(36).substr(2, 6);
 let currentUserName = localStorage.getItem('userDisplayName') || '';
 let isAdmin = false;
+let adminSelectedUserId = null;
 let chatInitialized = false;
 const CHAT_COLLECTION = 'globalChat';
 const USERS_COLLECTION = 'users';
@@ -262,7 +263,7 @@ async function updateSidebarContent() {
                         </h4>
                         <div class="user-list" style="max-height: 250px; overflow-y: auto;">
                             ${users.map(user => `
-                                <div class="user-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.6rem; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 0.4rem; border: 1px solid #2d3345;">
+                                <div class="user-contact-row" data-user-id="${user.userId}" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.6rem; background: ${adminSelectedUserId === user.userId ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.03)'}; border-radius: 8px; margin-bottom: 0.4rem; border: 1px solid #2d3345; transition: background 0.2s;">
                                     <div>
                                         <strong style="font-size: 0.85rem; color: #e6edf3;">${user.displayName || 'Anonymous'}</strong><br>
                                         <small style="color: #6b7280;">ID: ${(user.userId || '').substring(0, 8)}...</small>
@@ -295,12 +296,31 @@ async function updateSidebarContent() {
             globalDelBtn.onclick = () => globalDeleteAllChats();
         }
 
+        // Bind per-contact click
+        sidebar.querySelectorAll('.user-contact-row').forEach(row => {
+            row.addEventListener('click', (e) => {
+                // Ignore clicks on the delete button
+                if (e.target.closest('.delete-user-msgs-btn')) return;
+                
+                adminSelectedUserId = row.getAttribute('data-user-id');
+                // Update UI selection
+                sidebar.querySelectorAll('.user-contact-row').forEach(r => r.style.background = 'rgba(255,255,255,0.03)');
+                row.style.background = 'rgba(59,130,246,0.2)';
+                loadMessagesRealtime();
+            });
+        });
+
         // Bind per-contact delete buttons
         sidebar.querySelectorAll('.delete-user-msgs-btn').forEach(btn => {
-            btn.onclick = async () => {
+            btn.onclick = async (e) => {
+                e.stopPropagation(); // prevent row click
                 const userId = btn.getAttribute('data-user-id');
                 const userName = btn.getAttribute('data-user-name');
                 if (confirm(`Delete ALL messages from "${userName}"?`)) {
+                    if (adminSelectedUserId === userId) {
+                        adminSelectedUserId = null; // deselect if deleting
+                        loadMessagesRealtime();
+                    }
                     await deleteUserMessages(userId);
                 }
             };
@@ -494,6 +514,11 @@ async function sendMessage(text) {
         return;
     }
 
+    if (isAdmin && !adminSelectedUserId) {
+        alert("Please select a user from the contact list first.");
+        return;
+    }
+
     const config = await fetchHomeConfig();
     const adminName = config?.hero?.name || 'Prince O.N';
 
@@ -506,7 +531,8 @@ async function sendMessage(text) {
         name: isAdmin ? `${adminName} (Admin)` : currentUserName,
         text: text,
         timestamp: timestamp,
-        isAdmin: isAdmin
+        isAdmin: isAdmin,
+        threadId: isAdmin ? adminSelectedUserId : currentUserId
     });
 
     // 2. Re-register the user in contacts so they reappear if they were deleted
@@ -519,20 +545,39 @@ async function sendMessage(text) {
     }
 }
 
+    let currentUnsubscribe = null;
+
 function loadMessagesRealtime() {
     if (!firestoreAvailable || !db) return;
 
     const msgsDiv = document.getElementById('chatMessages');
+    
+    if (isAdmin && !adminSelectedUserId) {
+        if (msgsDiv) {
+            msgsDiv.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; gap: 0.8rem; color: #94a3b8;">
+                    <i class="fas fa-hand-pointer fa-2x"></i>
+                    <span style="font-size: 0.85rem;">Select a contact to start chatting</span>
+                </div>
+            `;
+        }
+        return;
+    }
+
     if (msgsDiv) {
         msgsDiv.innerHTML = `
             <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; gap: 0.8rem; color: #3b82f6;">
                 <i class="fas fa-spinner fa-pulse fa-2x"></i>
-                <span style="font-size: 0.85rem; color: #94a3b8;">Loading chat...</span>
+                <span style="font-size: 0.85rem;">Loading chat...</span>
             </div>
         `;
     }
 
-    db.collection(CHAT_COLLECTION)
+    if (currentUnsubscribe) {
+        currentUnsubscribe();
+    }
+
+    currentUnsubscribe = db.collection(CHAT_COLLECTION)
         .orderBy('timestamp', 'asc')
         .onSnapshot(snapshot => {
             const msgsDiv = document.getElementById('chatMessages');
@@ -543,6 +588,15 @@ function loadMessagesRealtime() {
 
             snapshot.forEach(doc => {
                 const data = doc.data();
+
+                // Advanced 1-on-1 filtering logic
+                const threadId = data.threadId || (data.isAdmin ? null : data.userId);
+                
+                if (isAdmin) {
+                    if (threadId !== adminSelectedUserId) return;
+                } else {
+                    if (threadId !== currentUserId) return;
+                }
 
                 // Regular users: skip messages older than their last local delete
                 if (!isAdmin && data.timestamp <= lastDelete) return;
