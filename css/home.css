@@ -19,9 +19,17 @@
     border-radius: 6px;
 }
 
-.skeleton-text.short { width: 40%; }
-.skeleton-text.medium { width: 65%; }
-.skeleton-text.long { width: 90%; }
+.skeleton-text.short {
+    width: 40%;
+}
+
+.skeleton-text.medium {
+    width: 65%;
+}
+
+.skeleton-text.long {
+    width: 90%;
+}
 
 .skeleton-card {
     background: linear-gradient(90deg, #1a1e2a 25%, #252a3a 50%, #1a1e2a 75%);
@@ -48,8 +56,13 @@
 }
 
 @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 /* ========== HERO SECTION ========== */
@@ -504,6 +517,11 @@
         text-align: center;
     }
 
+    .circle-img {
+        width: 250px;
+        height: 250px;
+    }
+
     .moving-text {
         margin: 0 auto;
         font-size: 1.2rem;
@@ -534,6 +552,15 @@
 
     .info-card {
         padding: 1.25rem 0.75rem;
+        overflow: hidden;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        max-width: 100vw;
+    }
+
+    .info-card.contact-card #contactEmailDisplay {
+        font-size: 1.1rem;
+        word-break: break-all;
     }
 
     .admin-login-btn {
@@ -558,7 +585,8 @@
 .info-card.about-me:hover p,
 .info-card.about-me:hover li,
 .info-card.about-me:hover span {
-    font-weight: 600 !important; /* Semi-bold */
+    font-weight: 600 !important;
+    /* Semi-bold */
     color: #ffffff !important;
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
@@ -602,7 +630,8 @@
     color: #a78bfa;
     text-decoration: none;
     transition: all 0.2s;
-    margin-bottom: 0.1rem; /* Minimized space */
+    margin-bottom: 0.1rem;
+    /* Minimized space */
 }
 
 .info-card.contact-card #contactEmailDisplay:hover {
@@ -611,12 +640,14 @@
 }
 
 #contactProposalBtn {
-    background: #1e3a8a !important; /* Dark Blue */
+    background: #1e3a8a !important;
+    /* Dark Blue */
     color: #ffffff !important;
     font-weight: bold;
     padding: 1rem 2rem;
     font-size: 1.1rem;
-    margin-top: 0.2rem; /* Minimized space */
+    margin-top: 0.2rem;
+    /* Minimized space */
     width: 100%;
     max-width: 400px;
     border-radius: 12px;
