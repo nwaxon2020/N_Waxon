@@ -1,0 +1,748 @@
+/* ========== CHAT PAGE ========== */
+#chat-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0.8rem 0;
+}
+
+.chat-layout {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+}
+
+/* ========== CHAT SIDEBAR ========== */
+.chat-sidebar {
+    flex: 1;
+    background: #0f1219;
+    border-radius: 12px;
+    padding: 1.2rem;
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #20232c;
+}
+
+.chat-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-sidebar::-webkit-scrollbar-track {
+    background: #1a1e2a;
+    border-radius: 6px;
+}
+
+.chat-sidebar::-webkit-scrollbar-thumb {
+    background: #7c3aed;
+    border-radius: 6px;
+}
+
+.chat-sidebar h3 {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+/* ========== CHAT MAIN ========== */
+.chat-main {
+    flex: 2.5;
+    background: #0f1219;
+    border-radius: 12px;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+    border: 1px solid #20232c;
+}
+
+/* ========== MESSAGES AREA ========== */
+.messages-area {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 0.3rem;
+}
+
+.messages-area::-webkit-scrollbar {
+    width: 4px;
+}
+
+.messages-area::-webkit-scrollbar-track {
+    background: #1a1e2a;
+    border-radius: 6px;
+}
+
+.messages-area::-webkit-scrollbar-thumb {
+    background: #7c3aed;
+    border-radius: 6px;
+}
+
+/* ========== MESSAGE BUBBLES ========== */
+.msg-bubble {
+    background: #1f2538;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+.msg-bubble strong {
+    color: #a78bfa;
+    font-size: 0.75rem;
+}
+
+.msg-bubble br+* {
+    font-size: 0.8rem;
+}
+
+.my-msg {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #2b2f42, #1f2538);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.other-msg {
+    align-self: flex-start;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.other-msg strong {
+    color: #d97706 !important; /* Dark Orange */
+}
+
+.msg-bubble strong {
+    font-size: 0.75rem;
+}
+
+/* ========== CHAT INPUT AREA ========== */
+.chat-input-area {
+    display: flex;
+    gap: 8px;
+    margin-top: 0.8rem;
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 1rem 12px;
+    font-size: 0.8rem;
+}
+
+.chat-input-area button {
+    padding: 1rem;
+    font-size: 0.8rem;
+}
+
+/* ========== CHAT ACTIONS BUTTONS ========== */
+.chat-actions {
+    margin-top: 0.6rem;
+    display: flex;
+    gap: 0.8rem;
+    justify-content: space-between;
+}
+
+.chat-actions button {
+    padding: 0.8rem 1rem;
+    font-size: 0.75rem;
+}
+
+.chat-actions button:first-child {
+    background: #3b2c44;
+    flex: 1;
+}
+
+.chat-actions button:last-child {
+    flex: 2;
+}
+
+/* ========== DELETE NAME BUTTON STYLES ========== */
+#deleteNameBtn {
+    background: #dc2626;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.65rem;
+    margin-top: 0;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: 12px;
+}
+
+#deleteNameBtn:hover {
+    background: #ef4444;
+    transform: translateY(-1px);
+}
+
+#userDisplayName {
+    color: #a78bfa;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* ========== MODALS ========== */
+.name-prompt-modal,
+.admin-login-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+}
+
+.name-prompt-modal.active,
+.admin-login-modal.active {
+    display: flex;
+}
+
+.name-prompt-content,
+.admin-login-content {
+    background: linear-gradient(135deg, #0f1219, #0a0c10);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 360px;
+    text-align: center;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    animation: modalSlideIn 0.2s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.name-prompt-content h3,
+.admin-login-content h3 {
+    margin-bottom: 0.8rem;
+    color: #a78bfa;
+    font-size: 1.2rem;
+}
+
+.name-prompt-content p,
+.admin-login-content p {
+    margin-bottom: 1rem;
+    color: #8f9bb3;
+    font-size: 0.85rem;
+}
+
+.name-prompt-content input,
+.admin-login-content input {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+}
+
+.admin-login-buttons {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.admin-login-buttons button {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.admin-login-buttons button:last-child {
+    background: #2d3748;
+}
+
+/* ========== USER LIST ========== */
+.user-list {
+    margin-top: 0.8rem;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.user-list::-webkit-scrollbar {
+    width: 3px;
+}
+
+.user-list::-webkit-scrollbar-track {
+    background: #1a1e2a;
+    border-radius: 6px;
+}
+
+.user-list::-webkit-scrollbar-thumb {
+    background: #7c3aed;
+    border-radius: 6px;
+}
+
+.user-item {
+    padding: 0.4rem;
+    margin: 0.4rem 0;
+    background: #1a1e2a;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.8rem;
+}
+
+.user-item:hover {
+    background: #2d3345;
+    transform: translateX(3px);
+}
+
+.user-item.active-user {
+    border-left: 2px solid #a78bfa;
+    background: #2d3345;
+}
+
+/* ========== PROPOSAL MODAL ========== */
+.proposal-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.proposal-modal.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.proposal-modal-content {
+    background: linear-gradient(135deg, #0f1219 0%, #0a0c10 100%);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 750px;
+    max-height: 94vh;
+    overflow-y: auto;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.2s ease;
+}
+
+.proposal-modal-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.proposal-modal-content::-webkit-scrollbar-track {
+    background: #1a1e2a;
+    border-radius: 6px;
+}
+
+.proposal-modal-content::-webkit-scrollbar-thumb {
+    background: #7c3aed;
+    border-radius: 6px;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.proposal-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: 12px 12px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.proposal-modal-header h2 {
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #a78bfa, #22d3ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.proposal-modal-body {
+    padding: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.proposal-modal-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.proposal-modal-body::-webkit-scrollbar-track {
+    background: #1a1e2a;
+    border-radius: 6px;
+}
+
+.proposal-modal-body::-webkit-scrollbar-thumb {
+    background: #7c3aed;
+    border-radius: 6px;
+}
+
+.form-section {
+    margin-bottom: 1.5rem;
+}
+
+.form-section h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.8rem;
+    color: #a78bfa;
+}
+
+.form-row {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-group label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #cbd5e6;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 12px;
+}
+
+.proposal-modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    background: #0a0c10;
+    border-radius: 0 0 12px 12px;
+    position: sticky;
+    bottom: 0;
+}
+
+.proposal-modal-footer>div {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.btn-secondary {
+    background: #2d3748;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 12px;
+}
+
+.btn-primary {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chat-layout {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chat-main {
+        min-height: 500px;
+    }
+
+    .chat-sidebar {
+        max-height: 420px;
+    }
+
+    .chat-input-area input {
+        padding: 12px 12px;
+        font-size: 0.5rem;
+    }
+
+    .chat-input-area button {
+        padding: 12px;
+        font-size: 0.5rem;
+    }
+
+    .chat-actions button {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+    }
+
+    .chat-actions {
+        flex-direction: column;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+
+    .proposal-modal-content {
+        width: 95%;
+    }
+
+    .proposal-modal-body {
+        padding: 1rem;
+    }
+
+    .proposal-modal-header,
+    .proposal-modal-footer {
+        padding: 0.8rem 1rem;
+    }
+
+    .proposal-modal-footer {
+        flex-direction: column;
+    }
+
+    .proposal-modal-footer>div {
+        width: 100%;
+    }
+
+    form-row .btn-secondary,
+    .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.routeBtns {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.routeBtns button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 12px;
+}
+
+#backNameBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 12px;
+    color: #fff;
+    text-decoration: underline;
+}
+
+/* ========== PROPOSAL MODAL BUTTONS - RESPONSIVE ========== */
+/* Desktop default - show full text */
+.proposal-modal-footer .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.proposal-modal-footer .btn-primary .btn-text {
+    display: inline;
+}
+
+/* Tablet view (max-width: 768px) - show icons with short text or just icons */
+@media (max-width: 768px) {
+    .proposal-modal-footer {
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1rem;
+    }
+
+    .proposal-modal-footer>div {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* Make buttons take equal space */
+    .proposal-modal-footer .btn-primary {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+        padding: 0.7rem 0.5rem;
+    }
+
+    /* Keep text but make it smaller */
+    .proposal-modal-footer .btn-primary .btn-text {
+        font-size: 0.75rem;
+        display: inline;
+    }
+
+    .proposal-modal-footer .btn-primary i {
+        font-size: 1rem;
+    }
+}
+
+/* Mobile view (max-width: 480px) - icons only */
+@media (max-width: 480px) {
+
+    .proposal-modal-footer .btn-primary {
+        min-width: calc(50% - 0.4rem);
+        padding: 0.8rem 0.3rem;
+    }
+
+    /* Hide text, show only icons */
+    .proposal-modal-footer .btn-primary .btn-text {
+        display: none;
+    }
+
+    /* Make icons larger for easier tapping */
+    .proposal-modal-footer .btn-primary i {
+        font-size: 1.3rem;
+        margin: 0;
+    }
+
+    /* Add tooltip effect on long press (optional) */
+    .proposal-modal-footer .btn-primary {
+        position: relative;
+    }
+}
+
+/* Extra small devices (max-width: 380px) */
+@media (max-width: 380px) {
+    .proposal-modal-footer .btn-primary {
+        min-width: 100%;
+        padding: 0.8rem;
+    }
+
+    .proposal-modal-footer>div {
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .proposal-modal-footer {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .proposal-modal-footer>div {
+        width: auto;
+        flex: 2;
+    }
+
+    .proposal-modal-footer .btn-secondary {
+        flex: 1;
+    }
+
+    .proposal-modal-footer .btn-primary {
+        min-width: 100px;
+    }
+
+    /* Show short text on landscape */
+    .proposal-modal-footer .btn-primary .btn-text {
+        display: inline;
+        font-size: 0.7rem;
+    }
+
+    .proposal-modal-footer .btn-primary i {
+        font-size: 0.9rem;
+    }
+}
+
+/* Hover effects for buttons */
+.proposal-modal-footer .btn-primary:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+.proposal-modal-footer .btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Specific button colors */
+.btn-primary#sendProposalWhatsApp {
+    background: #075e54;
+}
+
+.btn-primary#sendProposalEmail {
+    background: linear-gradient(95deg, #EA4335, #C5221F);
+}
+
+.btn-secondary {
+    background: #2d3748;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: #374151;
+    transform: translateY(-2px);
+}

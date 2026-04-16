@@ -1,0 +1,161 @@
+/* ========== BASE STYLES ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #0a0c10;
+    color: #eef2ff;
+    scroll-behavior: smooth;
+}
+
+/* ========== GLOBAL WEBKIT SCROLLBAR STYLES ========== */
+body::-webkit-scrollbar {
+    width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+    background: #1a1e2a;
+    border-radius: 6px;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: #7c3aed;
+    border-radius: 6px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: #a855f7;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* ========== NAVIGATION ========== */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 5rem;
+    background: rgba(10, 12, 16, 0.8);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a5f3fc, #7c3aed);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.nav-links {
+    display: flex;
+    gap: 5rem;
+}
+
+.nav-links a {
+    color: #cbd5e6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s;
+    font-size: 0.9rem;
+}
+
+.nav-links a.active,
+.nav-links a:hover {
+    color: white;
+    text-shadow: 0 0 6px #7c3aed;
+}
+
+/* ========== PAGE TRANSITIONS - CRITICAL FOR PAGE SWITCHING ========== */
+.page {
+    display: none !important;
+}
+
+.page.active-page {
+    display: block !important;
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.active-page {
+    animation: fade 0.3s ease;
+}
+
+/* ========== BUTTONS ========== */
+button,
+.btn {
+    background: linear-gradient(95deg, #7c3aed, #a855f7);
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.85rem;
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* ========== FORM ELEMENTS ========== */
+input,
+textarea,
+select {
+    background: #1e212b;
+    border: 1px solid #2e3342;
+    padding: 10px 14px;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #7c3aed;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 780px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    nav {
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1rem;
+    }
+
+    .nav-links {
+        gap: 2rem;
+    }
+}
