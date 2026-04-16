@@ -168,6 +168,11 @@ function checkSectionDirty(sectionId) {
                 tiktok: document.getElementById('adminTikTok')?.value || '',
                 twitter: document.getElementById('adminTwitter')?.value || ''
             };
+            const currentParas = Array.from(document.querySelectorAll('.about-para-input')).map(i => i.value);
+            const currentBullets = Array.from(document.querySelectorAll('.about-bullet-item')).map(item => ({
+                icon: item.querySelector('.about-bullet-icon').value,
+                text: item.querySelector('.about-bullet-text').value
+            }));
             
             const origAbout = originalHomeConfig.about || {};
             const origContacts = originalHomeConfig.contacts || {};
@@ -182,7 +187,10 @@ function checkSectionDirty(sectionId) {
                                     contacts.tiktok !== (origSocials.tiktok || 'https://tiktok.com/@') ||
                                     contacts.twitter !== (origSocials.twitter || 'https://twitter.com/');
 
-            return isContactsDirty || currentAboutTitle !== (origAbout.title || '');
+            const isParasDirty = JSON.stringify(currentParas) !== JSON.stringify(origAbout.paragraphs || []);
+            const isBulletsDirty = JSON.stringify(currentBullets) !== JSON.stringify(origAbout.bullets || []);
+
+            return isContactsDirty || currentAboutTitle !== (origAbout.title || '') || isParasDirty || isBulletsDirty;
         }
 
         if (sectionId === 'project-settings') {
@@ -211,7 +219,8 @@ function checkSectionDirty(sectionId) {
                 text: item.querySelector('.quick-link-text').value,
                 url: item.querySelector('.quick-link-url').value
             }));
-            const origLinks = originalHomeConfig.quickLinks || [];
+            const rawOrig = originalHomeConfig.quickLinks || [];
+            const origLinks = rawOrig.map(l => ({ icon: l.icon || '', text: l.text || '', url: l.url || '' }));
             return JSON.stringify(currentLinks) !== JSON.stringify(origLinks);
         }
     } catch (e) {
@@ -224,12 +233,17 @@ function initFloatingBarActions() {
     const saveBtn = document.getElementById('saveChangesBtn');
     const discardBtn = document.getElementById('discardChangesBtn');
 
-    saveBtn.onclick = () => {
-        // Find the save button inside the active tab and click it
+    saveBtn.onclick = async () => {
         const activeSection = document.getElementById(activeTabId);
-        const sectionSaveBtn = activeSection.querySelector('.save-config-btn, #saveProjectBtn');
-        if (sectionSaveBtn) {
-            sectionSaveBtn.click();
+        if (activeSection) {
+            const sectionSaveBtns = Array.from(activeSection.querySelectorAll('.save-config-btn, #saveProjectBtn'));
+            
+            saveBtn.innerText = 'Saving...';
+            for (const btn of sectionSaveBtns) {
+                btn.click();
+                await new Promise(r => setTimeout(r, 600)); // Delay loop execution iteratively to stop database config race condition overrides
+            }
+            saveBtn.innerText = 'Save Changes';
         }
     };
 
@@ -381,7 +395,15 @@ function initHomeAdmin() {
                 
                 if (tabId) setDirty(tabId, false);
                 await loadHomeConfig(); // Refresh original state
-                alert('Success: Settings saved globally!');
+                
+                // Debounce success alert so it doesn't spam globally during sequential grouped batch saves
+                if (!window._saveAlertPending) {
+                    window._saveAlertPending = true;
+                    setTimeout(() => {
+                        alert('Success: Settings saved globally!');
+                        window._saveAlertPending = false;
+                    }, 400);
+                }
             } catch (err) {
                 console.error(err);
                 alert('Error saving settings: ' + err.message);
@@ -632,26 +654,32 @@ function resetProjectForm() {
     document.getElementById('adminMediaItemsContainer').innerHTML = '';
 }
 
+let unsubscribeAdminProjects = null;
 async function loadProjectsList() {
     const list = document.getElementById('adminProjectsList');
+    if (!list || !db) return;
+
     list.innerHTML = 'Loading projects...';
     
-    const projects = await getDocs('projects');
-    list.innerHTML = '';
-    
-    projects.forEach(proj => {
-        const card = document.createElement('div');
-        card.className = 'admin-project-item';
-        card.innerHTML = `
-            <img src="${proj.media?.[0]?.url || 'https://via.placeholder.com/150'}" alt="thumb">
-            <strong>${proj.name}</strong>
-            <p style="font-size: 0.7rem; color: #8b949e;">${proj.category} | ${proj.languages}</p>
-            <div class="admin-project-actions">
-                <button class="edit-btn" onclick="editProject('${proj.id}')">Edit</button>
-                <button class="delete-btn" onclick="showConfirmDeleteProject('${proj.id}')">Delete</button>
-            </div>
-        `;
-        list.appendChild(card);
+    if (unsubscribeAdminProjects) unsubscribeAdminProjects();
+
+    unsubscribeAdminProjects = db.collection('projects').onSnapshot(snapshot => {
+        list.innerHTML = '';
+        snapshot.forEach(doc => {
+            const proj = { id: doc.id, ...doc.data() };
+            const card = document.createElement('div');
+            card.className = 'admin-project-item';
+            card.innerHTML = `
+                <img src="${proj.media?.[0]?.url || 'https://via.placeholder.com/150'}" alt="thumb">
+                <strong>${proj.name}</strong>
+                <p style="font-size: 0.7rem; color: #8b949e;">${proj.category} | ${proj.languages}</p>
+                <div class="admin-project-actions">
+                    <button class="edit-btn" onclick="editProject('${proj.id}')">Edit</button>
+                    <button class="delete-btn" onclick="showConfirmDeleteProject('${proj.id}')">Delete</button>
+                </div>
+            `;
+            list.appendChild(card);
+        });
     });
 }
 

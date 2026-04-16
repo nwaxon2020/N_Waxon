@@ -1,23 +1,35 @@
 import { blogMedia } from './main.js';
 import { getDocs } from './firebase-helpers.js';
+import { db } from './firebase-config.js';
 
 let allProjects = [];
 let currentFilter = 'All';
 
-export async function initBlogPage() {
-    await loadBlogGrid();
+export function initBlogPage() {
+    loadBlogGrid();
     initOverlay();
     initFilters();
 }
 
-async function loadBlogGrid() {
+let unsubscribeBlogProjects = null;
+
+function loadBlogGrid() {
     const grid = document.getElementById('blogGrid');
-    if (!grid) return;
+    if (!grid || !db) return;
 
     grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading projects...</div>';
 
-    allProjects = await getDocs('projects');
-    renderGrid(allProjects);
+    if (unsubscribeBlogProjects) unsubscribeBlogProjects();
+
+    unsubscribeBlogProjects = db.collection('projects').onSnapshot(snapshot => {
+        allProjects = [];
+        snapshot.forEach(doc => {
+            allProjects.push({ id: doc.id, ...doc.data() });
+        });
+        
+        const filtered = currentFilter === 'All' ? allProjects : allProjects.filter(p => p.category === currentFilter);
+        renderGrid(filtered);
+    });
 }
 
 function renderGrid(projects) {

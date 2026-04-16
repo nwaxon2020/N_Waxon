@@ -189,6 +189,8 @@ function initNamePrompt() {
 }
 
 // ========== SIDEBAR ==========
+let unsubscribeAdminContacts = null;
+
 async function updateSidebarContent() {
     const sidebar = document.getElementById('contactSidebarContent');
     if (!sidebar) return;
@@ -232,103 +234,105 @@ async function updateSidebarContent() {
             </div>
         `;
 
-        if (firestoreAvailable && db) {
-            try {
-                const snapshot = await db.collection(USERS_COLLECTION).orderBy('timestamp', 'desc').get();
-                let usersMap = new Map();
-                
-                snapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    if (data.userId) usersMap.set(data.userId, data);
-                });
-
-                // Reconstruct missing contacts from chat history
-                const chatSnapshot = await db.collection(CHAT_COLLECTION).orderBy('timestamp', 'asc').get();
-                chatSnapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    if (data.userId && !data.isAdmin && !usersMap.has(data.userId)) {
-                        usersMap.set(data.userId, {
-                            userId: data.userId,
-                            displayName: data.userName || data.name || 'Unknown',
-                            timestamp: data.timestamp
-                        });
-                    }
-                });
-
-                const users = Array.from(usersMap.values()).sort((a, b) => b.timestamp - a.timestamp);
-                
-                // Track known contacts to detect new ones in realtime
-                knownContactIds = new Set(users.map(u => u.userId));
-
-                if (users.length > 0) {
-                    usersHTML = `
-                        <h4 style="margin: 1rem 0 0.5rem; color: #8b949e; font-size: 0.85rem;">
-                            Contacts (${users.length})
-                        </h4>
-                        <div class="user-list" style="max-height: 250px; overflow-y: auto;">
-                            ${users.map(user => `
-                                <div class="user-contact-row" data-user-id="${user.userId}" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.6rem; background: ${adminSelectedUserId === user.userId ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.03)'}; border-radius: 8px; margin-bottom: 0.4rem; border: 1px solid #2d3345; transition: background 0.2s;">
-                                    <div>
-                                        <strong style="font-size: 0.85rem; color: #e6edf3;">${user.displayName || 'Anonymous'}</strong><br>
-                                        <small style="color: #6b7280;">ID: ${(user.userId || '').substring(0, 8)}...</small>
-                                    </div>
-                                    <button class="delete-user-msgs-btn" data-user-id="${user.userId}" data-user-name="${escapeHtml(user.displayName || 'Anonymous')}"
-                                        style="background: rgba(220,38,38,0.15); color: #ef4444; border: none; padding: 0.35rem 0.6rem; 
-                                        border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0;"
-                                        title="Delete this user's messages">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                } else {
-                    usersHTML = '<p style="color: #6b7280; font-size: 0.8rem; margin-top: 0.5rem;">No contacts yet.</p>';
-                }
-            } catch (err) {
-                console.error("[Chat] Error loading users:", err);
-                usersHTML = '<p style="color: #ef4444; font-size: 0.8rem; margin-top: 0.5rem;">Error loading contacts.</p>';
-            }
-        }
-        
-        const contactsArea = document.getElementById('adminContactsArea');
-        if (contactsArea) contactsArea.innerHTML = usersHTML;
-
         // Bind global delete
         const globalDelBtn = document.getElementById('globalSidebarDeleteBtn');
         if (globalDelBtn) {
             globalDelBtn.onclick = () => globalDeleteAllChats();
         }
 
-        // Bind per-contact click
-        sidebar.querySelectorAll('.user-contact-row').forEach(row => {
-            row.addEventListener('click', (e) => {
-                // Ignore clicks on the delete button
-                if (e.target.closest('.delete-user-msgs-btn')) return;
-                
-                adminSelectedUserId = row.getAttribute('data-user-id');
-                // Update UI selection
-                sidebar.querySelectorAll('.user-contact-row').forEach(r => r.style.background = 'rgba(255,255,255,0.03)');
-                row.style.background = 'rgba(59,130,246,0.2)';
-                loadMessagesRealtime();
-            });
-        });
+        if (firestoreAvailable && db) {
+            if (unsubscribeAdminContacts) unsubscribeAdminContacts();
 
-        // Bind per-contact delete buttons
-        sidebar.querySelectorAll('.delete-user-msgs-btn').forEach(btn => {
-            btn.onclick = async (e) => {
-                e.stopPropagation(); // prevent row click
-                const userId = btn.getAttribute('data-user-id');
-                const userName = btn.getAttribute('data-user-name');
-                if (confirm(`Delete ALL messages from "${userName}"?`)) {
-                    if (adminSelectedUserId === userId) {
-                        adminSelectedUserId = null; // deselect if deleting
-                        loadMessagesRealtime();
+            unsubscribeAdminContacts = db.collection(USERS_COLLECTION).orderBy('timestamp', 'desc').onSnapshot(async userSnapshot => {
+                try {
+                    let usersMap = new Map();
+                    userSnapshot.docs.forEach(doc => {
+                        const data = doc.data();
+                        if (data.userId) usersMap.set(data.userId, data);
+                    });
+
+                    // Reconstruct missing contacts from chat history
+                    const chatSnapshot = await db.collection(CHAT_COLLECTION).orderBy('timestamp', 'asc').get();
+                    chatSnapshot.docs.forEach(doc => {
+                        const data = doc.data();
+                        if (data.userId && !data.isAdmin && !usersMap.has(data.userId)) {
+                            usersMap.set(data.userId, {
+                                userId: data.userId,
+                                displayName: data.userName || data.name || 'Unknown',
+                                timestamp: data.timestamp
+                            });
+                        }
+                    });
+
+                    const users = Array.from(usersMap.values()).sort((a, b) => b.timestamp - a.timestamp);
+                    knownContactIds = new Set(users.map(u => u.userId));
+
+                    if (users.length > 0) {
+                        usersHTML = `
+                            <h4 style="margin: 1rem 0 0.5rem; color: #8b949e; font-size: 0.85rem;">
+                                Contacts (${users.length})
+                            </h4>
+                            <div class="user-list" style="max-height: 250px; overflow-y: auto;">
+                                ${users.map(user => `
+                                    <div class="user-contact-row" data-user-id="${user.userId}" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.6rem; background: ${adminSelectedUserId === user.userId ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.03)'}; border-radius: 8px; margin-bottom: 0.4rem; border: 1px solid #2d3345; transition: background 0.2s;">
+                                        <div>
+                                            <strong style="font-size: 0.85rem; color: #e6edf3;">${user.displayName || 'Anonymous'}</strong><br>
+                                            <small style="color: #6b7280;">ID: ${(user.userId || '').substring(0, 8)}...</small>
+                                        </div>
+                                        <button class="delete-user-msgs-btn" data-user-id="${user.userId}" data-user-name="${escapeHtml(user.displayName || 'Anonymous')}"
+                                            style="background: rgba(220,38,38,0.15); color: #ef4444; border: none; padding: 0.35rem 0.6rem; 
+                                            border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0;"
+                                            title="Delete this user's messages">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    } else {
+                        usersHTML = '<p style="color: #6b7280; font-size: 0.8rem; margin-top: 0.5rem;">No contacts yet.</p>';
                     }
-                    await deleteUserMessages(userId);
+
+                    const contactsArea = document.getElementById('adminContactsArea');
+                    if (contactsArea) {
+                        contactsArea.innerHTML = usersHTML;
+                        
+                        // Bind per-contact click
+                        contactsArea.querySelectorAll('.user-contact-row').forEach(row => {
+                            row.addEventListener('click', (e) => {
+                                if (e.target.closest('.delete-user-msgs-btn')) return;
+                                
+                                adminSelectedUserId = row.getAttribute('data-user-id');
+                                contactsArea.querySelectorAll('.user-contact-row').forEach(r => r.style.background = 'rgba(255,255,255,0.03)');
+                                row.style.background = 'rgba(59,130,246,0.2)';
+                                loadMessagesRealtime();
+                            });
+                        });
+
+                        // Bind per-contact delete
+                        contactsArea.querySelectorAll('.delete-user-msgs-btn').forEach(btn => {
+                            btn.onclick = async (e) => {
+                                e.stopPropagation();
+                                const userId = btn.getAttribute('data-user-id');
+                                const userName = btn.getAttribute('data-user-name');
+                                if (confirm(`Delete ALL messages from "${userName}"?`)) {
+                                    if (adminSelectedUserId === userId) {
+                                        adminSelectedUserId = null;
+                                        loadMessagesRealtime();
+                                    }
+                                    await deleteUserMessages(userId);
+                                }
+                            };
+                        });
+                    }
+
+                } catch (err) {
+                    console.error("[Chat] Error loading users dynamically:", err);
+                    const contactsArea = document.getElementById('adminContactsArea');
+                    if (contactsArea) contactsArea.innerHTML = '<p style="color: #ef4444; font-size: 0.8rem; margin-top: 0.5rem;">Error loading contacts live.</p>';
                 }
-            };
-        });
+            });
+        }
 
     } else {
         // ---- REGULAR USER SIDEBAR ----

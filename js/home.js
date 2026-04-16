@@ -1,20 +1,26 @@
 import { demoProjects } from './main.js';
 import { openProposalModal } from './chat.js';
 import { getDoc, getDocs } from './firebase-helpers.js';
+import { db } from './firebase-config.js';
 import { openOverlay } from './blog.js';
 
-export async function initHomePage() {
-    await applyHomeConfig();
-    await loadSlider();
+export function initHomePage() {
+    applyHomeConfig();
+    loadSlider();
     initMovingText();
     initHomeButtons();
     initSocialLinks();
     initViewMoreButton();
 }
 
-async function applyHomeConfig() {
-    const config = await getDoc('config', 'home');
-    if (!config) return;
+let unsubscribeHomeConfig = null;
+function applyHomeConfig() {
+    if (!db) return;
+    if (unsubscribeHomeConfig) unsubscribeHomeConfig();
+
+    unsubscribeHomeConfig = db.collection('config').doc('home').onSnapshot((docSnapshot) => {
+        if (!docSnapshot.exists) return;
+        const config = docSnapshot.data();
 
     // Logo & Title
     if (config.logoText) {
@@ -30,8 +36,10 @@ async function applyHomeConfig() {
         const subtextEl = document.getElementById('heroSubtext') || document.querySelector('.hero-text p');
         if (config.hero.subtext && subtextEl) subtextEl.innerText = config.hero.subtext;
         if (config.hero.imgUrl) document.getElementById('profileImage').src = config.hero.imgUrl;
-        // Moving text is handled in its own init if we pass the array
-        if (config.hero.movingWords) window._movingWords = config.hero.movingWords;
+        if (config.hero.movingWords) {
+            window._movingWords = config.hero.movingWords;
+            initMovingText();
+        }
     }
 
     // About
@@ -174,29 +182,36 @@ async function applyHomeConfig() {
             });
         });
     }
+});
 }
 
-async function loadSlider() {
+let unsubscribeProjects = null;
+function loadSlider() {
     const slider = document.getElementById('projectSlider');
-    if (!slider) return;
+    if (!slider || !db) return;
+
+    if (unsubscribeProjects) unsubscribeProjects();
 
     slider.innerHTML = 'Loading creations...';
 
-    // Fetch from Firestore
-    let projects = await getDocs('projects');
+    unsubscribeProjects = db.collection('projects').onSnapshot(snapshot => {
+        let projects = [];
+        snapshot.forEach(doc => {
+            projects.push({ id: doc.id, ...doc.data() });
+        });
 
-    // Filter for home page showcased projects
-    projects = projects.filter(proj => proj.showOnHome === true);
+        // Filter for home page showcased projects
+        projects = projects.filter(proj => proj.showOnHome === true);
 
-    // Fallback to demo data if no projects are highlighted
-    if (projects.length === 0) {
-        projects = demoProjects.map((p, i) => ({ ...p, name: p.title, media: [{ url: p.img, type: 'image' }] }));
-    }
+        // Fallback to demo data if no projects are highlighted
+        if (projects.length === 0) {
+            projects = demoProjects.map((p, i) => ({ ...p, name: p.title, media: [{ url: p.img, type: 'image' }] }));
+        }
 
-    // Ensure max 8 just in case
-    projects = projects.slice(0, 8);
+        // Ensure max 8 just in case
+        projects = projects.slice(0, 8);
 
-    slider.innerHTML = '';
+        slider.innerHTML = '';
     projects.forEach((proj, idx) => {
         const card = document.createElement('div');
         card.className = 'project-card';
@@ -216,10 +231,12 @@ async function loadSlider() {
         };
         slider.appendChild(card);
     });
+});
 }
 
+let movingTextInterval = null;
 function initMovingText() {
-    const texts = window._movingWords || ["Creative Developer", "AI Artist", "Full-Stack Architect", "Interactive Designer"];
+    const texts = window._movingWords && window._movingWords.length > 0 ? window._movingWords : ["Creative Developer", "AI Artist", "Full-Stack Architect", "Interactive Designer"];
     let idx = 0;
 
     const el = document.getElementById('movingText');
@@ -227,7 +244,9 @@ function initMovingText() {
         el.innerText = texts[0]; // Set initial
     }
 
-    setInterval(() => {
+    if (movingTextInterval) clearInterval(movingTextInterval);
+
+    movingTextInterval = setInterval(() => {
         const el = document.getElementById('movingText');
         if (el && texts.length > 0) {
             el.innerText = texts[idx % texts.length];
