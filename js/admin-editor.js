@@ -511,6 +511,18 @@ function addQuickLinkRow(data = { text: '', url: '', icon: 'fas fa-link' }) {
     div.innerHTML = `
         <select class="quick-link-icon" style="width: auto;">
             <option value="fas fa-link" ${data.icon === 'fas fa-link' ? 'selected' : ''}>🔗 Link</option>
+            <option value="fas fa-user" ${data.icon === 'fas fa-user' ? 'selected' : ''}>👤 Person</option>
+            <option value="fas fa-building" ${data.icon === 'fas fa-building' ? 'selected' : ''}>🏢 Office</option>
+            <option value="fas fa-car" ${data.icon === 'fas fa-car' ? 'selected' : ''}>🚗 Cars</option>
+            <option value="fas fa-book" ${data.icon === 'fas fa-book' ? 'selected' : ''}>📚 Books</option>
+            <option value="fas fa-plane" ${data.icon === 'fas fa-plane' ? 'selected' : ''}>✈️ Plane</option>
+            <option value="fas fa-tree" ${data.icon === 'fas fa-tree' ? 'selected' : ''}>🌳 Trees</option>
+            <option value="fas fa-envelope" ${data.icon === 'fas fa-envelope' ? 'selected' : ''}>✉️ Email</option>
+            <option value="fas fa-camera" ${data.icon === 'fas fa-camera' ? 'selected' : ''}>📷 Camera</option>
+            <option value="fas fa-music" ${data.icon === 'fas fa-music' ? 'selected' : ''}>🎵 Music</option>
+            <option value="fas fa-gamepad" ${data.icon === 'fas fa-gamepad' ? 'selected' : ''}>🎮 Gamepad</option>
+            <option value="fas fa-star" ${data.icon === 'fas fa-star' ? 'selected' : ''}>⭐ Star</option>
+            <option value="fas fa-shopping-cart" ${data.icon === 'fas fa-shopping-cart' ? 'selected' : ''}>🛒 Shop</option>
             <option value="fab fa-github" ${data.icon === 'fab fa-github' ? 'selected' : ''}>🐱 GitHub</option>
             <option value="fas fa-globe" ${data.icon === 'fas fa-globe' ? 'selected' : ''}>🌐 Globe</option>
             <option value="fas fa-code" ${data.icon === 'fas fa-code' ? 'selected' : ''}>💻 Code</option>
