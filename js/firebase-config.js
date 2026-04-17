@@ -35,5 +35,6 @@ try {
     console.warn("Firebase initialization failed:", e);
 }
 
-export { firebase, db, storage, auth, firestoreAvailable, storageAvailable, authAvailable };
+const firebaseInstance = firebase;
+export { firebaseInstance as firebase, db, storage, auth, firestoreAvailable, storageAvailable, authAvailable };
 

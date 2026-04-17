@@ -107,7 +107,7 @@ function applyHomeConfig() {
 
         // Add visual phone number to contact card if it doesn't exist
         let phoneDisplay = document.getElementById('contactPhoneDisplay');
-        if (!phoneDisplay && phone && contactCard) {
+        if (!phoneDisplay && phone && contactCard && emailP && emailP.parentNode) {
             phoneDisplay = document.createElement('a');
             phoneDisplay.id = 'contactPhoneDisplay';
             phoneDisplay.style.display = 'block';
