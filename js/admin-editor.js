@@ -553,10 +553,17 @@ function addMediaRow(data = { url: '', type: 'image' }) {
     const container = document.getElementById('adminMediaItemsContainer');
     const div = document.createElement('div');
     div.className = 'media-entry';
+    
+    // Generate a unique ID for this row's radio buttons to prevent cross-row interference
+    const rowId = Math.random().toString(36).substr(2, 9);
+    
+    // Sanitize type
+    const mediaType = (data.type === 'video') ? 'video' : 'image';
+
     div.innerHTML = `
         <div class="media-type-switch">
-            <label><input type="radio" name="mt_${Date.now()}" value="image" ${data.type === 'image' ? 'checked' : ''}> 🖼️ Image</label>
-            <label><input type="radio" name="mt_${Date.now()}" value="video" ${data.type === 'video' ? 'checked' : ''}> 🎥 Video</label>
+            <label><input type="radio" name="mt_${rowId}" value="image" ${mediaType === 'image' ? 'checked' : ''}> 🖼️ Image</label>
+            <label><input type="radio" name="mt_${rowId}" value="video" ${mediaType === 'video' ? 'checked' : ''}> 🎥 Video</label>
         </div>
         <div class="form-group">
             <input type="text" class="media-url" placeholder="Direct URL" value="${data.url}">
@@ -576,10 +583,15 @@ function addMediaRow(data = { url: '', type: 'image' }) {
         if (file) {
             previewContainer.innerHTML = '<em>Loading preview...</em>';
             const url = URL.createObjectURL(file);
+            
+            // AUTO PROTECT: Automatically switch the radio button based on file type
+            const typeRadios = div.querySelectorAll('input[type="radio"]');
             if (file.type.startsWith('image')) {
                 previewContainer.innerHTML = `<img src="${url}" style="max-width: 100px; border-radius: 8px;">`;
-            } else {
+                typeRadios.forEach(r => { if(r.value === 'image') r.checked = true; });
+            } else if (file.type.startsWith('video')) {
                 previewContainer.innerHTML = `<video src="${url}" style="max-width: 100px; border-radius: 8px;" muted></video>`;
+                typeRadios.forEach(r => { if(r.value === 'video') r.checked = true; });
             }
             setDirty('project-settings', true);
         }
@@ -616,7 +628,8 @@ async function saveProject() {
         const mediaList = [];
 
         for (const entry of mediaEntries) {
-            const type = entry.querySelector('input[type="radio"]:checked').value;
+            const checkedRadio = entry.querySelector('input[type="radio"]:checked');
+            const type = checkedRadio ? checkedRadio.value : 'image'; // Safety fallback
             const urlInput = entry.querySelector('.media-url').value;
             const fileInput = entry.querySelector('.media-file').files[0];
             

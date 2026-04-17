@@ -35,5 +35,5 @@ try {
     console.warn("Firebase initialization failed:", e);
 }
 
-export { db, storage, auth, firestoreAvailable, storageAvailable, authAvailable };
+export { firebase, db, storage, auth, firestoreAvailable, storageAvailable, authAvailable };
 

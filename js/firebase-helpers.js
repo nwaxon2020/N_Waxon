@@ -1,4 +1,4 @@
-import { db, storage } from './firebase-config.js';
+import { firebase, db, storage } from './firebase-config.js';
 
 /**
  * Uploads a file to Firebase Storage and returns the download URL
@@ -9,7 +9,10 @@ import { db, storage } from './firebase-config.js';
 export async function uploadFile(file, path) {
     if (!storage) throw new Error("Firebase Storage not available");
     const storageRef = storage.ref(path);
-    const snapshot = await storageRef.put(file);
+    const metadata = {
+        contentType: file.type // Crucial for MP4s and correct browser rendering
+    };
+    const snapshot = await storageRef.put(file, metadata);
     return await snapshot.ref.getDownloadURL();
 }
 
