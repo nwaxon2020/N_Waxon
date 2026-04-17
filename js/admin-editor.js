@@ -743,11 +743,22 @@ async function initChatAdmin() {
                         });
                         
                         await batch.commit();
+
+                        const userSnapshot = await db.collection('users').get();
+                        if (!userSnapshot.empty) {
+                            const docs = userSnapshot.docs;
+                            for (let i = 0; i < docs.length; i += 500) {
+                                const uBatch = db.batch();
+                                docs.slice(i, i + 500).forEach(doc => uBatch.delete(doc.ref));
+                                await uBatch.commit();
+                            }
+                        }
+                        
                         // Clear the local chat messages area if it exists
                         const msgsArea = document.getElementById('chatMessages');
-                        if (msgsArea) msgsArea.innerHTML = '<div class="system-msg">Chat database cleared globally.</div>';
+                        if (msgsArea) msgsArea.innerHTML = '<div class="system-msg">Chat database and contacts cleared globally.</div>';
                         
-                        alert('Success: All chat data has been permanently deleted.');
+                        alert('Success: All chat data and contacts have been permanently deleted.');
                     } catch (err) {
                         console.error("Global Delete Error:", err);
                         alert('Error deleting chats. Check console for details.');
