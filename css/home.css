@@ -214,6 +214,44 @@
 }
 
 /* ========== SLIDER ========== */
+.slider-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(124, 58, 237, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: background 0.3s, transform 0.3s;
+}
+
+.slider-arrow:hover {
+    background: rgba(124, 58, 237, 1);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slider-arrow.left-arrow {
+    left: -20px;
+}
+
+.slider-arrow.right-arrow {
+    right: -20px;
+}
+
 .slider-container {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -223,6 +261,7 @@
     scrollbar-width: thin;
     cursor: grab;
     max-height: 280px;
+    width: 100%;
 }
 
 .slider-container::-webkit-scrollbar {
@@ -237,6 +276,25 @@
 .slider-container::-webkit-scrollbar-thumb {
     background: #7c3aed;
     border-radius: 6px;
+}
+
+/* Hide scrollbar on desktop, show arrows */
+@media (min-width: 1001px) {
+    .slider-container {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .slider-container::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* Hide arrows on mobile because of touch swipe */
+@media (max-width: 1000px) {
+    .slider-arrow {
+        display: none;
+    }
 }
 
 .project-card {
@@ -271,7 +329,11 @@
 
 @media (max-width: 1000px) {
     .project-card {
-        flex: 0 0 calc(50% - 0.5rem);
+        flex: 0 0 calc(50% - 0.25rem);
+    }
+
+    .slider-container {
+        gap: 1rem;
     }
 }
 

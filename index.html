@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>N-WAXON | Premium Portfolio</title>
+    <!-- Social Meta Tags -->
+    <meta property="og:title" content="N-WAXON | Premium Portfolio">
+    <meta property="og:description" content="Welcome to my premium portfolio. Let's create something amazing.">
+    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/n-waxon.firebasestorage.app/o/home%2Fhero_1776291243734?alt=media&token=81e015d1-9705-4d2a-8e10-fc02a06cd61b">
+    <meta property="og:url" content="https://n-waxon.web.app/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="N-WAXON | Premium Portfolio">
+    <meta name="twitter:description" content="Welcome to my premium portfolio. Let's create something amazing.">
+    <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/n-waxon.firebasestorage.app/o/home%2Fhero_1776291243734?alt=media&token=81e015d1-9705-4d2a-8e10-fc02a06cd61b">
     <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap"
@@ -17,6 +26,7 @@
     <link rel="stylesheet" href="css/blog.css">
     <link rel="stylesheet" href="css/chat.css">
     <link rel="stylesheet" href="css/admin.css">
+    <link rel="icon" type="image/x-icon" href="/images/icon.png">
 </head>
 
 <body>
@@ -62,11 +72,16 @@
                 <h2>✨ Popular Creations</h2>
                 <button id="viewMoreBtn" class="view-more-btn">View More →</button>
             </div>
-            <div class="slider-container" id="projectSlider">
-                <div class="skeleton-card" style="flex:0 0 calc(25% - 0.8rem);"></div>
-                <div class="skeleton-card" style="flex:0 0 calc(25% - 0.8rem);"></div>
-                <div class="skeleton-card" style="flex:0 0 calc(25% - 0.8rem);"></div>
-                <div class="skeleton-card" style="flex:0 0 calc(25% - 0.8rem);"></div>
+            <div class="slider-wrapper">
+                <button id="scrollLeftBtn" class="slider-arrow left-arrow"><i class="fas fa-chevron-left"></i></button>
+                <div class="slider-container" id="projectSlider">
+                    <div class="skeleton-card" style="flex:0 0 calc(25% - 0.8rem);"></div>
+                    <div class="skeleton-card" style="flex:0 0 calc(25% - 0.8rem);"></div>
+                    <div class="skeleton-card" style="flex:0 0 calc(25% - 0.8rem);"></div>
+                    <div class="skeleton-card" style="flex:0 0 calc(25% - 0.8rem);"></div>
+                </div>
+                <button id="scrollRightBtn" class="slider-arrow right-arrow"><i
+                        class="fas fa-chevron-right"></i></button>
             </div>
 
             <!-- about & contact -->

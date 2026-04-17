@@ -11,6 +11,7 @@ export function initHomePage() {
     initHomeButtons();
     initSocialLinks();
     initViewMoreButton();
+    initSliderScroll();
 }
 
 let unsubscribeHomeConfig = null;
@@ -317,6 +318,26 @@ function initViewMoreButton() {
     if (viewMoreBtn) {
         viewMoreBtn.addEventListener('click', () => {
             document.querySelector('[data-page="blog"]').click();
+        });
+    }
+}
+
+function initSliderScroll() {
+    const leftBtn = document.getElementById('scrollLeftBtn');
+    const rightBtn = document.getElementById('scrollRightBtn');
+    const slider = document.getElementById('projectSlider');
+
+    if (leftBtn && slider) {
+        leftBtn.addEventListener('click', () => {
+            const scrollAmount = slider.clientWidth * 0.8; 
+            slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        });
+    }
+
+    if (rightBtn && slider) {
+        rightBtn.addEventListener('click', () => {
+            const scrollAmount = slider.clientWidth * 0.8;
+            slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         });
     }
 }
