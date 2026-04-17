@@ -330,22 +330,7 @@
     background: linear-gradient(135deg, #0f1219 0%, #0a0c10 100%);
     border-radius: 12px;
     border: 1px solid rgba(124, 58, 237, 0.2);
-    max-height: 200px;
     overflow-y: auto;
-}
-
-.links-section::-webkit-scrollbar {
-    width: 4px;
-}
-
-.links-section::-webkit-scrollbar-track {
-    background: #1a1e2a;
-    border-radius: 6px;
-}
-
-.links-section::-webkit-scrollbar-thumb {
-    background: #7c3aed;
-    border-radius: 6px;
 }
 
 .links-section h3 {
@@ -533,6 +518,23 @@
     .grid-2col {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+
+    .links-section {
+        margin: 2rem 0 1rem;
+        padding: 1rem 0.5rem;
+        border-radius: 10px;
+    }
+
+    .links-section h3 {
+        margin: 0.5rem;
+    }
+
+
+    .link-card {
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
     }
 
     .footer-content {
