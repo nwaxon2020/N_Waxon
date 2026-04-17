@@ -197,8 +197,14 @@ async function updateSidebarContent() {
 
     const config = await fetchHomeConfig();
     const adminName = config?.hero?.name || 'Prince O.N';
-    const adminImg = config?.hero?.imgUrl || '/images/ceo1.png';
+    const adminImg = config?.hero?.imgUrl || 'images/ceo1.png'; // Use local relative path as fallback
     const displayName = currentUserName || 'Guest';
+
+    // Update the "Live Chat with [Name]" header
+    const chatNameDisplay = document.getElementById('chatAdminNameDisplay');
+    if (chatNameDisplay) {
+        chatNameDisplay.innerText = adminName;
+    }
 
     if (isAdmin) {
         // ---- ADMIN SIDEBAR ----
@@ -338,7 +344,7 @@ async function updateSidebarContent() {
         // ---- REGULAR USER SIDEBAR ----
         sidebar.innerHTML = `
             <div style="display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0;">
-                <img src="${adminImg}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                <img src="${adminImg}" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover;">
                 <div>
                     <strong>${adminName}</strong><br>
                     <small style="color: #a78bfa;">Available for work</small>
@@ -806,22 +812,32 @@ function sendToWhatsApp() {
     const data = getProposalData();
     if (!validateProposal(data)) return;
 
-    const msg = `NEW JOB PROPOSAL%0A%0AName: ${data.name}%0AEmail: ${data.email}%0APhone: ${data.phone || 'N/A'}%0ACompany: ${data.company || 'N/A'}%0A%0ADescription: ${data.desc}%0ABudget: ${data.budget}%0ATimeline: ${data.timeline}%0AOffer: ${data.offer || 'N/A'}%0AType: ${data.projectType || 'N/A'}%0A%0ANotes: ${data.notes || 'N/A'}`;
-    window.open(`https://wa.me/1234567890?text=${msg}`, '_blank');
-    alert("Proposal prepared! WhatsApp will open.");
-    clearProposalForm();
-    closeProposalModal();
+    fetchHomeConfig().then(config => {
+        let phone = config?.contacts?.phone || '1234567890';
+        // Clean phone number for WhatsApp
+        phone = phone.replace(/\s+/g, '').replace('+', '');
+        if (phone.startsWith('0')) phone = '234' + phone.substring(1);
+
+        const msg = `NEW JOB PROPOSAL%0A%0AName: ${data.name}%0AEmail: ${data.email}%0APhone: ${data.phone || 'N/A'}%0ACompany: ${data.company || 'N/A'}%0A%0ADescription: ${data.desc}%0ABudget: ${data.budget}%0ATimeline: ${data.timeline}%0AOffer: ${data.offer || 'N/A'}%0AType: ${data.projectType || 'N/A'}%0A%0ANotes: ${data.notes || 'N/A'}`;
+        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+        alert("Proposal prepared! WhatsApp will open.");
+        clearProposalForm();
+        closeProposalModal();
+    });
 }
 
 function sendToEmail() {
     const data = getProposalData();
     if (!validateProposal(data)) return;
 
-    const body = `NEW JOB PROPOSAL\n\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone || 'N/A'}\nCompany: ${data.company || 'N/A'}\n\nDescription: ${data.desc}\nBudget: ${data.budget}\nTimeline: ${data.timeline}\nOffer: ${data.offer || 'N/A'}\nType: ${data.projectType || 'N/A'}\n\nNotes: ${data.notes || 'N/A'}`;
-    window.location.href = `mailto:alex@n-waxon.com?subject=Job Proposal from ${data.name}&body=${encodeURIComponent(body)}`;
-    alert("Email client will open.");
-    clearProposalForm();
-    closeProposalModal();
+    fetchHomeConfig().then(config => {
+        const email = config?.contacts?.email || 'admin@example.com';
+        const body = `NEW JOB PROPOSAL\n\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone || 'N/A'}\nCompany: ${data.company || 'N/A'}\n\nDescription: ${data.desc}\nBudget: ${data.budget}\nTimeline: ${data.timeline}\nOffer: ${data.offer || 'N/A'}\nType: ${data.projectType || 'N/A'}\n\nNotes: ${data.notes || 'N/A'}`;
+        window.location.href = `mailto:${email}?subject=Job Proposal from ${data.name}&body=${encodeURIComponent(body)}`;
+        alert("Email client will open.");
+        clearProposalForm();
+        closeProposalModal();
+    });
 }
 
 function clearProposalForm() {

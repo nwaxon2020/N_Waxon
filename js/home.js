@@ -99,7 +99,26 @@ function applyHomeConfig() {
         }
         if (emailP && email) {
             emailP.innerHTML = `📧 ${email}`;
-            if (emailP.tagName === 'A') emailP.href = `mailto:${email}`;
+            emailP.href = `mailto:${email}`;
+            emailP.style.display = 'inline-block';
+        } else if (emailP) {
+            emailP.style.display = 'none';
+        }
+
+        // Add visual phone number to contact card if it doesn't exist
+        let phoneDisplay = document.getElementById('contactPhoneDisplay');
+        if (!phoneDisplay && phone && contactCard) {
+            phoneDisplay = document.createElement('a');
+            phoneDisplay.id = 'contactPhoneDisplay';
+            phoneDisplay.style.display = 'block';
+            phoneDisplay.style.marginTop = '0.5rem';
+            phoneDisplay.style.color = '#8b949e';
+            phoneDisplay.style.fontSize = '0.9rem';
+            emailP.parentNode.insertBefore(phoneDisplay, emailP.nextSibling);
+        }
+        if (phoneDisplay && phone) {
+            phoneDisplay.innerHTML = `📱 ${phone}`;
+            phoneDisplay.href = `tel:${phone}`;
         }
 
         // Apply to Hero Buttons
