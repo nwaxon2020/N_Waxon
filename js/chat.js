@@ -118,7 +118,7 @@ export async function deleteUserName() {
             try {
                 // Delete user profile
                 await db.collection(USERS_COLLECTION).doc(oldUserId).delete();
-                
+
                 // Delete messages globally
                 const snapshot = await db.collection(CHAT_COLLECTION).where('userId', '==', oldUserId).get();
                 if (!snapshot.empty) {
@@ -140,10 +140,10 @@ export async function deleteUserName() {
         currentUserName = '';
         localStorage.setItem('chatUserId', currentUserId);
         setCurrentUser('');
-        
+
         const msgsDiv = document.getElementById('chatMessages');
         if (msgsDiv) msgsDiv.innerHTML = '';
-        
+
         await updateSidebarContent();
 
         setTimeout(() => {
@@ -208,13 +208,13 @@ async function updateSidebarContent() {
 
     if (isAdmin) {
         // ---- ADMIN SIDEBAR ----
-        
+
         let usersHTML = `
             <div style="display: flex; justify-content: center; align-items: center; padding: 2rem; color: #3b82f6;">
                 <i class="fas fa-circle-notch fa-spin fa-lg"></i>
             </div>
         `;
-        
+
         // Temporarily render sidebar with loading state
         sidebar.innerHTML = `
             <div style="display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0;">
@@ -302,12 +302,12 @@ async function updateSidebarContent() {
                     const contactsArea = document.getElementById('adminContactsArea');
                     if (contactsArea) {
                         contactsArea.innerHTML = usersHTML;
-                        
+
                         // Bind per-contact click
                         contactsArea.querySelectorAll('.user-contact-row').forEach(row => {
                             row.addEventListener('click', (e) => {
                                 if (e.target.closest('.delete-user-msgs-btn')) return;
-                                
+
                                 adminSelectedUserId = row.getAttribute('data-user-id');
                                 contactsArea.querySelectorAll('.user-contact-row').forEach(r => r.style.background = 'rgba(255,255,255,0.03)');
                                 row.style.background = 'rgba(59,130,246,0.2)';
@@ -385,7 +385,7 @@ async function globalDeleteAllChats() {
 
         let messagesDeleted = 0;
         const msgSnapshot = await db.collection(CHAT_COLLECTION).get();
-        
+
         if (!msgSnapshot.empty) {
             const docs = msgSnapshot.docs;
             for (let i = 0; i < docs.length; i += 500) {
@@ -455,7 +455,7 @@ async function deleteUserMessages(userId) {
         await db.collection(USERS_COLLECTION).doc(userId).delete();
 
         alert(`Deleted contact and all their messages.`);
-        
+
         // Refresh sidebar to remove them from the list
         await updateSidebarContent();
     } catch (err) {
@@ -559,13 +559,13 @@ async function sendMessage(text) {
     }
 }
 
-    let currentUnsubscribe = null;
+let currentUnsubscribe = null;
 
 function loadMessagesRealtime() {
     if (!firestoreAvailable || !db) return;
 
     const msgsDiv = document.getElementById('chatMessages');
-    
+
     if (isAdmin && !adminSelectedUserId) {
         if (msgsDiv) {
             msgsDiv.innerHTML = `
@@ -605,7 +605,7 @@ function loadMessagesRealtime() {
 
                 // Advanced 1-on-1 filtering logic
                 const threadId = data.threadId || (data.isAdmin ? null : data.userId);
-                
+
                 if (isAdmin) {
                     if (threadId && !knownContactIds.has(threadId)) {
                         // We found a new chatter that isn't in the sidebar yet!
@@ -721,6 +721,7 @@ function createProposalModal() {
                             <label><i class="fas fa-dollar-sign"></i> Budget Range *</label>
                             <select id="proposalBudget" required>
                                 <option value="">Select budget range</option>
+                                <option value="$200 - $500">$200 - $500</option>
                                 <option value="$500 - $1,000">$500 - $1,000</option>
                                 <option value="$1,000 - $2,500">$1,000 - $2,500</option>
                                 <option value="$2,500 - $5,000">$2,500 - $5,000</option>
@@ -818,7 +819,7 @@ function sendToWhatsApp() {
         phone = phone.replace(/\s+/g, '').replace('+', '');
         if (phone.startsWith('0')) phone = '234' + phone.substring(1);
 
-        const msg = `NEW JOB PROPOSAL%0A%0AName: ${data.name}%0AEmail: ${data.email}%0APhone: ${data.phone || 'N/A'}%0ACompany: ${data.company || 'N/A'}%0A%0ADescription: ${data.desc}%0ABudget: ${data.budget}%0ATimeline: ${data.timeline}%0AOffer: ${data.offer || 'N/A'}%0AType: ${data.projectType || 'N/A'}%0A%0ANotes: ${data.notes || 'N/A'}`;
+        const msg = `*NEW JOB PROPOSAL*%0A%0AName: *${data.name}*%0AEmail: ${data.email}%0APhone: ${data.phone || 'N/A'}%0ACompany: ${data.company || 'N/A'}%0A%0ADescription: ${data.desc}%0ABudget: *${data.budget}*%0ATimeline: *${data.timeline}*%0AOffer: *${data.offer || 'N/A'}*%0AType: *${data.projectType || 'N/A'}*%0A%0ANotes: ${data.notes || 'N/A'}`;
         window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
         alert("Proposal prepared! WhatsApp will open.");
         clearProposalForm();
