@@ -690,15 +690,36 @@ async function loadProjectsList() {
 
     unsubscribeAdminProjects = db.collection('projects').onSnapshot(snapshot => {
         list.innerHTML = '';
+        if (snapshot.empty) {
+            list.innerHTML = '<p style="color: #6b7280; padding: 1rem;">No projects found. Add your first creation!</p>';
+            return;
+        }
+
         snapshot.forEach(doc => {
             const proj = { id: doc.id, ...doc.data() };
+            
+            // THUMBNAIL LOGIC: Find the first image, or fallback to a video placeholder
+            let thumbUrl = 'https://via.placeholder.com/150?text=No+Media';
+            let isVideoThumb = false;
+
+            if (proj.media && proj.media.length > 0) {
+                const firstImg = proj.media.find(m => m.type === 'image');
+                if (firstImg) {
+                    thumbUrl = firstImg.url;
+                } else if (proj.media[0].type === 'video') {
+                    // It's a video-only project
+                    thumbUrl = 'https://img.icons8.com/flat-bubble/100/video.png'; // Distinct video icon
+                    isVideoThumb = true;
+                }
+            }
+
             const card = document.createElement('div');
             card.className = 'admin-project-item';
             if (proj.showOnHome) {
                 card.style.border = '2px solid #22c55e';
             }
             card.innerHTML = `
-                <img src="${proj.media?.[0]?.url || 'https://via.placeholder.com/150'}" alt="thumb">
+                <img src="${thumbUrl}" alt="thumb">
                 <strong>${proj.name}</strong>
                 <p style="font-size: 0.7rem; color: #8b949e;">${proj.category} | ${proj.languages}</p>
                 <div class="admin-project-actions">

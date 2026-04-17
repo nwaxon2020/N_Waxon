@@ -239,21 +239,40 @@
     border: 1px solid #30363d;
     border-radius: 12px;
     overflow: hidden;
-    padding: 1rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .admin-project-item img {
     width: 100%;
-    height: 120px;
+    height: 136px;
     object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 0.8rem;
+    border-radius: 0;
+    margin-bottom: 0;
+}
+
+.admin-project-item strong, 
+.admin-project-item p,
+.admin-project-actions {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.admin-project-item strong {
+    padding-top: 0.5rem;
+    display: block;
+}
+
+.admin-project-item p {
+    margin-bottom: 0.5rem;
 }
 
 .admin-project-actions {
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
+    padding-bottom: 1rem;
 }
 
 .admin-project-actions button {
