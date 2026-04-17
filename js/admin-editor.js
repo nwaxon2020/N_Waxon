@@ -681,6 +681,9 @@ async function loadProjectsList() {
             const proj = { id: doc.id, ...doc.data() };
             const card = document.createElement('div');
             card.className = 'admin-project-item';
+            if (proj.showOnHome) {
+                card.style.border = '2px solid #22c55e';
+            }
             card.innerHTML = `
                 <img src="${proj.media?.[0]?.url || 'https://via.placeholder.com/150'}" alt="thumb">
                 <strong>${proj.name}</strong>
@@ -715,6 +718,12 @@ window.editProject = async (id) => {
     
     // Reset dirty state since we just loaded a project
     setDirty('project-settings', false);
+
+    // Auto-scroll up to the top of the project settings tab so inputs are visible
+    const projectSettingsTab = document.getElementById('project-settings');
+    if (projectSettingsTab) {
+        projectSettingsTab.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 };
 
 window.showConfirmDeleteProject = (id) => {
