@@ -131,7 +131,10 @@ export function openOverlay(startIdx, projectList) {
     mainMediaContainer.style.justifyContent = 'center';
     mainMediaContainer.style.alignItems = 'center';
 
+    let currentIdx = 0;
+
     function updateMainMedia(idx) {
+        currentIdx = idx;
         let media = mediaItems[idx];
         if (!media) return;
 
@@ -188,6 +191,59 @@ export function openOverlay(startIdx, projectList) {
     } else {
         overlayBody.insertBefore(mainMediaContainer, closeBtn);
     }
+
+    // Set up navigation buttons
+    const prevBtn = document.getElementById('overlayPrevBtn');
+    const nextBtn = document.getElementById('overlayNextBtn');
+
+    if (prevBtn) {
+        prevBtn.style.display = mediaItems.length > 1 ? 'flex' : 'none';
+        prevBtn.onclick = (e) => {
+            e.stopPropagation();
+            const newIdx = (currentIdx - 1 + mediaItems.length) % mediaItems.length;
+            updateMainMedia(newIdx);
+        };
+    }
+
+    if (nextBtn) {
+        nextBtn.style.display = mediaItems.length > 1 ? 'flex' : 'none';
+        nextBtn.onclick = (e) => {
+            e.stopPropagation();
+            const newIdx = (currentIdx + 1) % mediaItems.length;
+            updateMainMedia(newIdx);
+        };
+    }
+
+    // Swipe detection for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    mainMediaContainer.ontouchstart = (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    };
+
+    mainMediaContainer.ontouchend = (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    };
+
+    function handleSwipe() {
+        if (mediaItems.length <= 1) return;
+        const threshold = 50;
+        if (touchEndX < touchStartX - threshold) {
+            // Swiped left -> Next
+            const newIdx = (currentIdx + 1) % mediaItems.length;
+            updateMainMedia(newIdx);
+        }
+        if (touchEndX > touchStartX + threshold) {
+            // Swiped right -> Prev
+            const newIdx = (currentIdx - 1 + mediaItems.length) % mediaItems.length;
+            updateMainMedia(newIdx);
+        }
+    }
+
+    // Clear existing thumbnails
+    thumbsDiv.innerHTML = '';
 
     // Build thumbnails
     mediaItems.forEach((item, i) => {
