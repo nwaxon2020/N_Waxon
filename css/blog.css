@@ -310,12 +310,12 @@
         height: 200px;
     }
 
-    /* Mobile overlay - full width with 8px padding */
+    /* Mobile overlay - full width with 2px padding */
     .overlay-content {
-        width: calc(100% - 16px);
+        width: 100%;
         max-width: none;
-        padding: 0.8rem;
-        margin: 0 8px;
+        padding: 0 2px;
+        margin: 0;
     }
 
     .main-media {
